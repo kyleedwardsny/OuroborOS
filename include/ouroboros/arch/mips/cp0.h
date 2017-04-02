@@ -3,23 +3,23 @@
 
 #ifndef __ASSEMBLER__
 
-#define xstr(...) str(__VA_ARGS__)
-#define str(...) #__VA_ARGS__
+#define mips_cp_xstr(r, s)	mips_cp_str(r, s)
+#define mips_cp_str(r, s)	#r "," #s
 
-#define MTC0(expr, reg)								\
-do {										\
-	__asm__("mtc0 %[mips_reg], " xstr(reg) : : [mips_reg] "r" (expr));	\
+#define MTC0(expr, reg)									\
+do {											\
+	__asm__("mtc0 %[mips_reg], " mips_cp_xstr(reg) : : [mips_reg] "r" (expr));	\
 } while (0)
 
-#define MFC0(var, reg)								\
-do {										\
-	__asm__("mfc0 %[mips_reg], " xstr(reg) : [mips_reg] "=r" (var) :);	\
+#define MFC0(var, reg)									\
+do {											\
+	__asm__("mfc0 %[mips_reg], " mips_cp_xstr(reg) : [mips_reg] "=r" (var) :);	\
 } while (0)
 
 #endif /* __ASSEMBLER__ */
 
 /* TLB array index */
-#define MIPS_CP0_INDEX				$0
+#define MIPS_CP0_INDEX				$0, 0
 
 /* Probe Failure */
 #define MIPS_CP0_INDEX_P			(0x80000000)
@@ -27,15 +27,15 @@ do {										\
 #define MIPS_CP0_INDEX_INDEX			(0x0000003F)
 
 /* TLB array random index */
-#define MIPS_CP0_RANDOM				$1
+#define MIPS_CP0_RANDOM				$1, 0
 
 /* Index to the entry */
 #define MIPS_CP0_RANDOM_RANDOM			(0x0000003F)
 
 /* TLB entry low-order word (even-numbered pages) */
-#define MIPS_CP0_ENTRY_LO0			$2
+#define MIPS_CP0_ENTRY_LO0			$2, 0
 /* TLB entry low-order word (odd-numbered pages) */
-#define MIPS_CP0_ENTRY_LO1			$3
+#define MIPS_CP0_ENTRY_LO1			$3, 0
 
 /* Page Frame Number */
 #define MIPS_CP0_ENTRY_LO_PFN			(0x03FFFFC0)
@@ -53,7 +53,7 @@ do {										\
 #define MIPS_CP0_ENTRY_LO_G			(0x00000001)
 
 /* Page table entry */
-#define MIPS_CP0_CONTEXT			$4
+#define MIPS_CP0_CONTEXT			$4, 0
 
 /* PTE base */
 #define MIPS_CP0_CONTEXT_PTEBASE		(0xFF800000)
@@ -64,31 +64,31 @@ do {										\
 #define MIPS_CP0_USER_LOCAL			$4, 2
 
 /* Control for variable page sizes in TLB entries */
-#define MIPS_CP0_PAGE_MASK			$5
+#define MIPS_CP0_PAGE_MASK			$5, 0
 
 /* Mask */
 #define MIPS_CP0_PAGE_MASK_MASK			(0x1FFFE000)
 
 /* Wired Register */
-#define MIPS_CP0_WIRED				$6
+#define MIPS_CP0_WIRED				$6, 0
 
 /* Wired */
 #define MIPS_CP0_WIRED_WIRED			(0x0000003F)
 
 /* HWREna Register */
-#define MIPS_CP0_HWRENA				$7
+#define MIPS_CP0_HWRENA				$7, 0
 
 /* Mask */
 #define MIPS_CP0_HWRENA_MASK			(0x3FFFFFFF)
 
 /* BadVAddr Register */
-#define MIPS_CP0_BADVADDR			$8
+#define MIPS_CP0_BADVADDR			$8, 0
 
 /* Count Register */
-#define MIPS_CP0_COUNT				$9
+#define MIPS_CP0_COUNT				$9, 0
 
 /* TLB entry high-order word */
-#define MIPS_CP0_ENTRY_HO			$10
+#define MIPS_CP0_ENTRY_HO			$10, 0
 
 /* VPN2 */
 #define MIPS_CP0_ENTRY_HO_VPN2			(0xFFFFE000)
@@ -97,10 +97,10 @@ do {										\
 #define MIPS_CP0_ENTRY_HO_ASID			(0x000000FF)
 
 /* Compare Register */
-#define MIPS_CP0_COMPARE			$11
+#define MIPS_CP0_COMPARE			$11, 0
 
 /* Status Register */
-#define MIPS_CP0_STATUS				$12
+#define MIPS_CP0_STATUS				$12, 0
 
 /* Coprocessor 2 */
 #define MIPS_CP0_STATUS_CU2			(0x40000000)
@@ -217,7 +217,7 @@ do {										\
 #define MIPS_CP0_SRSMAP_SSV0			(0x0000000F)
 
 /* Cause Register */
-#define MIPS_CP0_CAUSE				$13
+#define MIPS_CP0_CAUSE				$13, 0
 
 /* Branch delay */
 #define MIPS_CP0_CAUSE_BD			(0x80000000)
@@ -249,10 +249,10 @@ do {										\
 #define MIPS_CP0_CAUSE_EXC			(0x0000007C)
 
 /* Exception Program Counter */
-#define MIPS_CP0_EPC				$14
+#define MIPS_CP0_EPC				$14, 0
 
 /* Processor Identification */
-#define MIPS_CP0_PRID				$15
+#define MIPS_CP0_PRID				$15, 0
 
 /* Company Option */
 #define MIPS_CP0_PRID_CO			(0xFF000000)
@@ -278,7 +278,7 @@ do {										\
 #define MIPS_CP0_EBASE_CPUNUM			(0x000003FF)
 
 /* Config Register */
-#define MIPS_CP0_CONFIG				$16
+#define MIPS_CP0_CONFIG				$16, 0
 
 /* Presence of register */
 #define MIPS_CP0_CONFIG_M			(0x80000000)
@@ -495,7 +495,7 @@ do {										\
 #define MIPS_CP0_WATCHHI_W			(0x00000001)
 
 /* Debug Register */
-#define MIPS_CP0_DEBUG				$23
+#define MIPS_CP0_DEBUG				$23, 0
 
 /* Branch delay slot */
 #define MIPS_CP0_DEBUG_DBD			(0x80000000)
@@ -640,7 +640,7 @@ do {										\
 #define MIPS_CP0_TRACEIBPC_DBPC_START(i)	(0x1 << ((i) * 3))
 
 /* Debug Exception Program Counter Register */
-#define MIPS_CP0_DEPC				$24
+#define MIPS_CP0_DEPC				$24, 0
 
 /* Performance Counter Control Register */
 #define MIPS_CP0_PCCTL(i)			$25, (2 * (i))
@@ -664,7 +664,7 @@ do {										\
 #define MIPS_CP0_PCCNT(i)			$25, (2 * (i) + 1)
 
 /* ErrCtl Register */
-#define MIPS_CP0_ERRCTL				$26
+#define MIPS_CP0_ERRCTL				$26, 0
 
 /* Parity Enable */
 #define MIPS_CP0_ERRCTL_PE			(0x80000000)
@@ -696,7 +696,7 @@ do {										\
 #define MIPS_CP0_ERRCTL_PD			(0x0000000F)
 
 /* CacheErr Register */
-#define MIPS_CP0_CACHEERR			$27
+#define MIPS_CP0_CACHEERR			$27, 0
 
 /* Error Reference */
 #define MIPS_CP0_CACHEERR_ER			(0x80000000)
@@ -724,7 +724,7 @@ do {										\
 #define MIPS_CP0_CACHEERR_INDEX			(0x000FFFFF)
 
 /* CacheErr Register (Secondary Cache) */
-#define MIPS_CP0_CACHEERR_S			$27
+#define MIPS_CP0_CACHEERR_S			$27, 0
 
 /* Cache level */
 #define MIPS_CP0_CACHEERR_S_EC			(0x40000000)
@@ -744,7 +744,7 @@ do {										\
 #define MIPS_CP0_CACHEERR_S_INDEX		(0x0007FFFF)
 
 /* ITagLo Register */
-#define MIPS_CP0_ITAGLO				$28
+#define MIPS_CP0_ITAGLO				$28, 0
 
 /* PTagLo */
 #define MIPS_CP0_ITAGLO_PTAGLO			(0xFFFFF800)
@@ -808,9 +808,9 @@ do {										\
 #define MIPS_CP0_L23DATAHI			$29, 5
 
 /* Error EPC */
-#define MIPS_CP0_ERROR_EPC			$30
+#define MIPS_CP0_ERROR_EPC			$30, 0
 
 /* DeSave Register */
-#define MIPS_CP0_DESAVE				$31
+#define MIPS_CP0_DESAVE				$31, 0
 
 #endif /* OUROBOROS_ARCH_MIPS_CP0_H */
