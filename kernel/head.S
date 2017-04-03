@@ -2,8 +2,8 @@
 #include <ouroboros/arch/mips/cp0.h>
 
 	.abicalls
-	.set STACK_BOTTOM, 0x8000000
-	.set TEXT_BEGIN, 0x10000
+	.set STACK_BOTTOM, 0x88000000
+	.set TEXT_BEGIN, 0x80010000
 
 	.section .text
 

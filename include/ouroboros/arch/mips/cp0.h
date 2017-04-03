@@ -16,6 +16,26 @@ do {											\
 	__asm__("mfc0 %[mips_reg], " mips_cp_xstr(reg) : [mips_reg] "=r" (var) :);	\
 } while (0)
 
+#define TLBR()			\
+do {				\
+	__asm__("tlbr" : :);	\
+} while (0)
+
+#define TLBWI()			\
+do {				\
+	__asm__("tlbwi" : :);	\
+} while (0)
+
+#define TLBWR()			\
+do {				\
+	__asm__("tlbwr" : :);	\
+} while (0)
+
+#define TLBP()			\
+do {				\
+	__asm__("tlbp" : :);	\
+} while (0)
+
 #endif /* __ASSEMBLER__ */
 
 /* TLB array index */
@@ -25,6 +45,7 @@ do {											\
 #define MIPS_CP0_INDEX_P			(0x80000000)
 /* Index to the entry */
 #define MIPS_CP0_INDEX_INDEX			(0x0000003F)
+#define MIPS_CP0_INDEX_INDEX_INDEX(n)		((n) & MIPS_CP0_INDEX_INDEX)
 
 /* TLB array random index */
 #define MIPS_CP0_RANDOM				$1, 0
@@ -39,6 +60,7 @@ do {											\
 
 /* Page Frame Number */
 #define MIPS_CP0_ENTRY_LO_PFN			(0x03FFFFC0)
+#define MIPS_CP0_ENTRY_LO_PFN_PFN(a)		(((a) >> 6) & MIPS_CP0_ENTRY_LO_PFN)
 /* Coherency */
 #define MIPS_CP0_ENTRY_LO_C			(0x00000038)
 #define MIPS_CP0_ENTRY_LO_C_CNWTN		(0x00000000)
@@ -68,6 +90,15 @@ do {											\
 
 /* Mask */
 #define MIPS_CP0_PAGE_MASK_MASK			(0x1FFFE000)
+#define MIPS_CP0_PAGE_MASK_MASK_4K		(0x00000000)
+#define MIPS_CP0_PAGE_MASK_MASK_16K		(0x00006000)
+#define MIPS_CP0_PAGE_MASK_MASK_64K		(0x0001E000)
+#define MIPS_CP0_PAGE_MASK_MASK_256K		(0x0007E000)
+#define MIPS_CP0_PAGE_MASK_MASK_1M		(0x001FE000)
+#define MIPS_CP0_PAGE_MASK_MASK_4M		(0x007FE000)
+#define MIPS_CP0_PAGE_MASK_MASK_16M		(0x01FFE000)
+#define MIPS_CP0_PAGE_MASK_MASK_64M		(0x07FFE000)
+#define MIPS_CP0_PAGE_MASK_MASK_256M		(0x1FFFE000)
 
 /* Wired Register */
 #define MIPS_CP0_WIRED				$6, 0
@@ -92,6 +123,7 @@ do {											\
 
 /* VPN2 */
 #define MIPS_CP0_ENTRY_HO_VPN2			(0xFFFFE000)
+#define MIPS_CP0_ENTRY_HO_VPN2_VPN2(a)		((a) & MIPS_CP0_ENTRY_HO_VPN2)
 
 /* ASID */
 #define MIPS_CP0_ENTRY_HO_ASID			(0x000000FF)

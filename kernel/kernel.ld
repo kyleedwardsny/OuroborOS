@@ -1,15 +1,11 @@
 SECTIONS
 {
-	. = 0x10000;
+	. = 0x80010000;
 	.text : { *(.text) }
-	.rodata : {
-		_rodata_start = ABSOLUTE(.);
-	       *(.rodata)
-		_rodata_end = ABSOLUTE(.);
-	}
-	. = 0x7000000;
+	.rodata : { *(.rodata) }
+	. = 0x87000000;
 	.data : { *(.data) }
-	. = 0x8000000;
+	. = 0x88000000;
 	.bss : { *(.bss) }
 }
 ENTRY(_start)
