@@ -145,26 +145,9 @@ void k_main(void)
 
 	set_tlb_entry(-1, &tlb_entry);
 
-	MFC0(status, MIPS_CP0_STATUS);
-	status &= ~(MIPS_CP0_STATUS_ERL | MIPS_CP0_STATUS_EXL | MIPS_CP0_STATUS_KSU);
-	status |= MIPS_CP0_STATUS_KSU_K;
-	MTC0(status, MIPS_CP0_STATUS);
-
-	MTC0(MIPS_CP0_ENTRY_HO_ASID_ASID(12), MIPS_CP0_ENTRY_HO);
-
-	*write = 0xDEADBEA7;
-	if (*read == 0xDEADBEA7) {
-		k_puts("Write success");
-	} else {
-		k_puts("Write failure");
-	}
-
-	MTC0(MIPS_CP0_ENTRY_HO_ASID_ASID(11), MIPS_CP0_ENTRY_HO);
-
-	*write = 0xDEADBEA7;
-	if (*read == 0xDEADBEA7) {
-		k_puts("Write success");
-	} else {
-		k_puts("Write failure");
-	}
+	for (index = 0; index < 1000000; index++);
+	MFC0(index, MIPS_CP0_INDEX);
+	TLBP();
+	MFC0(index, MIPS_CP0_INDEX);
+	MFC0(index, MIPS_CP0_RANDOM);
 }
