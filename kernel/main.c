@@ -70,33 +70,37 @@ void k_load_cmdline(int op, unsigned long arg1, unsigned long arg2)
 
 void k_main(void)
 {
-	ou_uint32_t mask;
+	ou_uint32_t status;
+	ou_uint32_t *write0 = (ou_uint32_t *) 0x05000000;
+	ou_uint32_t *write1 = (ou_uint32_t *) 0x05001000;
+	ou_uint32_t *read0 = (ou_uint32_t *) 0x86000000;
+	ou_uint32_t *read1 = (ou_uint32_t *) 0x86800000;
 
-	MTC0(0, MIPS_CP0_INDEX);
+	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(0), MIPS_CP0_INDEX);
 	MTC0(MIPS_CP0_PAGE_MASK_MASK_4K, MIPS_CP0_PAGE_MASK);
+	MTC0(MIPS_CP0_ENTRY_LO_PFN_PFN(0x06000000) | MIPS_CP0_ENTRY_LO_C_U | MIPS_CP0_ENTRY_LO_D | MIPS_CP0_ENTRY_LO_V | MIPS_CP0_ENTRY_LO_G, MIPS_CP0_ENTRY_LO0);
+	MTC0(MIPS_CP0_ENTRY_LO_PFN_PFN(0x06800000) | MIPS_CP0_ENTRY_LO_C_U | MIPS_CP0_ENTRY_LO_D | MIPS_CP0_ENTRY_LO_V | MIPS_CP0_ENTRY_LO_G, MIPS_CP0_ENTRY_LO1);
+	MTC0(MIPS_CP0_ENTRY_HO_VPN2_VPN2(0x05000000), MIPS_CP0_ENTRY_HO);
 	TLBWI();
 
-	MTC0(1, MIPS_CP0_INDEX);
-	MTC0(MIPS_CP0_PAGE_MASK_MASK_16K, MIPS_CP0_PAGE_MASK);
-	TLBWI();
+	MFC0(status, MIPS_CP0_STATUS);
+	status &= ~(MIPS_CP0_STATUS_ERL | MIPS_CP0_STATUS_EXL | MIPS_CP0_STATUS_KSU);
+	status |= MIPS_CP0_STATUS_KSU_K;
+	MTC0(status, MIPS_CP0_STATUS);
 
-	MTC0(0, MIPS_CP0_INDEX);
-	TLBR();
-	MFC0(mask, MIPS_CP0_PAGE_MASK);
+	*write0 = 0xdeadbea7;
 
-	if ((mask & MIPS_CP0_PAGE_MASK_MASK) == MIPS_CP0_PAGE_MASK_MASK_4K) {
-		k_puts("4k mask succeeded");
+	if (*read0 == 0xdeadbea7) {
+		k_puts("Even page wrote");
 	} else {
-		k_puts("4k mask failed");
+		k_puts("Even page didn't write");
 	}
 
-	MTC0(1, MIPS_CP0_INDEX);
-	TLBR();
-	MFC0(mask, MIPS_CP0_PAGE_MASK);
+	*write1 = 0xd00dfeed;
 
-	if ((mask & MIPS_CP0_PAGE_MASK_MASK) == MIPS_CP0_PAGE_MASK_MASK_16K) {
-		k_puts("16k mask succeeded");
+	if (*read1 == 0xd00dfeed) {
+		k_puts("Odd page wrote");
 	} else {
-		k_puts("16k mask failed");
+		k_puts("Odd page didn't write");
 	}
 }
