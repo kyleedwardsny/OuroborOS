@@ -12,8 +12,6 @@ _start:
 	li $sp, STACK_BOTTOM
 	addiu $sp, -12
 
-	jal k_load_cmdline
-
 	jal k_main
 
 0:

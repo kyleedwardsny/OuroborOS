@@ -3,6 +3,15 @@
 
 #ifndef __ASSEMBLER__
 
+#include <ouroboros/stdint.h>
+
+struct mips_tlb_entry {
+	ou_uint32_t entry_lo0;
+	ou_uint32_t entry_lo1;
+	ou_uint32_t entry_ho;
+	ou_uint32_t page_mask;
+};
+
 #define mips_cp_xstr(r, s)	mips_cp_str(r, s)
 #define mips_cp_str(r, s)	#r "," #s
 
@@ -127,6 +136,7 @@ do {				\
 
 /* ASID */
 #define MIPS_CP0_ENTRY_HO_ASID			(0x000000FF)
+#define MIPS_CP0_ENTRY_HO_ASID_ASID(i)		((i) & MIPS_CP0_ENTRY_HO_ASID)
 
 /* Compare Register */
 #define MIPS_CP0_COMPARE			$11, 0

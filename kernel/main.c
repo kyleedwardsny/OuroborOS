@@ -30,77 +30,141 @@ static void k_puts(const char *str)
 	k_putchar('\n');
 }
 
-void k_load_cmdline(int op, unsigned long arg1, unsigned long arg2)
+static int num_tlb_pages = -1;
+
+static int check_entry_lo_validity(ou_uint32_t entry_lo)
 {
-	ou_size_t i;
-	ou_size_t next_len;
-	ou_int32_t argc;
-	char *buf_current = cmdline_argv_buf;
-	const char **argv = (const char **) arg1;
+	if (entry_lo & BITS(31, 26)) {
+		return -1;
+	}
 
-	switch (op) {
-	case 0: /* No boot command line, nothing to do here */
-		break;
-
-	case -1: /* UHI */
-		argc = uhi_argc();
-		for (i = 0; i < argc; i++) {
-			next_len = uhi_argnlen(i);
-			uhi_argn(i, buf_current);
-			cmdline_argv[i] = buf_current;
-			buf_current += next_len + 1;
-		}
-		break;
-
-	case -2: /* Device Tree */
-		/* TODO */
+	switch (entry_lo & MIPS_CP0_ENTRY_LO_C) {
+	case MIPS_CP0_ENTRY_LO_C_CNWTN:
+	case MIPS_CP0_ENTRY_LO_C_U:
+	case MIPS_CP0_ENTRY_LO_C_CNWBA:
+	case MIPS_CP0_ENTRY_LO_C_UA:
 		break;
 
 	default:
-		if (op > 0) {
-			cmdline_argc = op;
-			for (i = 0; i < cmdline_argc; i++) {
-				ou_strcpy(buf_current, argv[i]);
-				cmdline_argv[i] = buf_current;
-				buf_current += ou_strlen(buf_current) + 1;
-			}
-		}
+		return -1;
 	}
+
+	return 0;
+}
+
+static int check_tlb_entry_validity(int index, const struct mips_tlb_entry *entry)
+{
+	int err;
+
+	if (index >= num_tlb_pages) {
+		return -1;
+	}
+
+	if ((err = check_entry_lo_validity(entry->entry_lo0)) < 0) {
+		return err;
+	}
+
+	if ((err = check_entry_lo_validity(entry->entry_lo1)) < 0) {
+		return err;
+	}
+
+	if (entry->entry_ho & BITS(12, 8)) {
+		return -1;
+	}
+
+	switch (entry->page_mask & MIPS_CP0_PAGE_MASK_MASK) {
+	case MIPS_CP0_PAGE_MASK_MASK_4K:
+	case MIPS_CP0_PAGE_MASK_MASK_16K:
+	case MIPS_CP0_PAGE_MASK_MASK_64K:
+	case MIPS_CP0_PAGE_MASK_MASK_256K:
+	case MIPS_CP0_PAGE_MASK_MASK_1M:
+	case MIPS_CP0_PAGE_MASK_MASK_4M:
+	case MIPS_CP0_PAGE_MASK_MASK_16M:
+	case MIPS_CP0_PAGE_MASK_MASK_64M:
+	case MIPS_CP0_PAGE_MASK_MASK_256M:
+		break;
+
+	default:
+		return -1;
+	}
+
+	return 0;
+}
+
+static int set_tlb_entry(int index, const struct mips_tlb_entry *entry)
+{
+	int err;
+
+	if ((err = check_tlb_entry_validity(index, entry)) < 0) {
+		return err;
+	}
+
+	MTC0(entry->entry_lo0, MIPS_CP0_ENTRY_LO0);
+	MTC0(entry->entry_lo1, MIPS_CP0_ENTRY_LO1);
+	MTC0(entry->entry_ho, MIPS_CP0_ENTRY_HO);
+	MTC0(entry->page_mask, MIPS_CP0_PAGE_MASK);
+
+	if (index < 0) { /* Random index */
+		TLBWR();
+	} else {
+		MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
+		TLBWI();
+	}
+
+	return 0;
+}
+
+void k_hang(void)
+{
+	for (;;);
 }
 
 void k_main(void)
 {
+	ou_uint32_t config1;
+	unsigned int mmu_size;
+	struct mips_tlb_entry tlb_entry;
+	ou_uint32_t index;
 	ou_uint32_t status;
-	ou_uint32_t *write0 = (ou_uint32_t *) 0x05000000;
-	ou_uint32_t *write1 = (ou_uint32_t *) 0x05001000;
-	ou_uint32_t *read0 = (ou_uint32_t *) 0x86000000;
-	ou_uint32_t *read1 = (ou_uint32_t *) 0x86800000;
+	ou_uint32_t *write = (ou_uint32_t *) 0x86000000;
+	ou_uint32_t *read = (ou_uint32_t *) 0x05000000;
 
-	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(0), MIPS_CP0_INDEX);
-	MTC0(MIPS_CP0_PAGE_MASK_MASK_4K, MIPS_CP0_PAGE_MASK);
-	MTC0(MIPS_CP0_ENTRY_LO_PFN_PFN(0x06000000) | MIPS_CP0_ENTRY_LO_C_U | MIPS_CP0_ENTRY_LO_D | MIPS_CP0_ENTRY_LO_V | MIPS_CP0_ENTRY_LO_G, MIPS_CP0_ENTRY_LO0);
-	MTC0(MIPS_CP0_ENTRY_LO_PFN_PFN(0x06800000) | MIPS_CP0_ENTRY_LO_C_U | MIPS_CP0_ENTRY_LO_D | MIPS_CP0_ENTRY_LO_V | MIPS_CP0_ENTRY_LO_G, MIPS_CP0_ENTRY_LO1);
-	MTC0(MIPS_CP0_ENTRY_HO_VPN2_VPN2(0x05000000), MIPS_CP0_ENTRY_HO);
-	TLBWI();
+	MFC0(config1, MIPS_CP0_CONFIG1);
+
+	mmu_size = (config1 & MIPS_CP0_CONFIG1_MMUSIZE) >> 25;
+	if (mmu_size > 0) {
+		num_tlb_pages = mmu_size + 1;
+	} else {
+		k_hang();
+	}
+
+	tlb_entry.entry_lo0 = MIPS_CP0_ENTRY_LO_PFN_PFN(0x06000000) | MIPS_CP0_ENTRY_LO_C_U | MIPS_CP0_ENTRY_LO_V;
+	tlb_entry.entry_lo1 = 0; /* Not valid */
+	tlb_entry.entry_ho = MIPS_CP0_ENTRY_HO_VPN2_VPN2(0x05000000) | MIPS_CP0_ENTRY_HO_ASID_ASID(12);
+	tlb_entry.page_mask = MIPS_CP0_PAGE_MASK_MASK_4K;
+
+	set_tlb_entry(-1, &tlb_entry);
 
 	MFC0(status, MIPS_CP0_STATUS);
 	status &= ~(MIPS_CP0_STATUS_ERL | MIPS_CP0_STATUS_EXL | MIPS_CP0_STATUS_KSU);
 	status |= MIPS_CP0_STATUS_KSU_K;
 	MTC0(status, MIPS_CP0_STATUS);
 
-	*write0 = 0xdeadbea7;
+	MTC0(MIPS_CP0_ENTRY_HO_ASID_ASID(12), MIPS_CP0_ENTRY_HO);
 
-	if (*read0 == 0xdeadbea7) {
-		k_puts("Even page wrote");
+	*write = 0xDEADBEA7;
+	if (*read == 0xDEADBEA7) {
+		k_puts("Write success");
 	} else {
-		k_puts("Even page didn't write");
+		k_puts("Write failure");
 	}
 
-	*write1 = 0xd00dfeed;
+	MTC0(MIPS_CP0_ENTRY_HO_ASID_ASID(11), MIPS_CP0_ENTRY_HO);
 
-	if (*read1 == 0xd00dfeed) {
-		k_puts("Odd page wrote");
+	*write = 0xDEADBEA7;
+	if (*read == 0xDEADBEA7) {
+		k_puts("Write success");
 	} else {
-		k_puts("Odd page didn't write");
+		k_puts("Write failure");
 	}
 }
