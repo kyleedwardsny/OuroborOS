@@ -70,51 +70,33 @@ void k_load_cmdline(int op, unsigned long arg1, unsigned long arg2)
 
 void k_main(void)
 {
-	ou_uint32_t pagemask = MIPS_CP0_PAGE_MASK_MASK_4K;
-	ou_uint32_t index = MIPS_CP0_INDEX_INDEX_INDEX(3);
-	ou_uint32_t entrylo =
-		MIPS_CP0_ENTRY_LO_PFN_PFN(0x6000000) |
-		MIPS_CP0_ENTRY_LO_C_U |
-		MIPS_CP0_ENTRY_LO_V |
-		MIPS_CP0_ENTRY_LO_D |
-		MIPS_CP0_ENTRY_LO_G;
-	ou_uint32_t entryho =
-		MIPS_CP0_ENTRY_HO_VPN2_VPN2(0x5000000);
-	ou_uint32_t status;
+	ou_uint32_t mask;
 
-	MTC0(pagemask, MIPS_CP0_PAGE_MASK);
-	MTC0(entrylo, MIPS_CP0_ENTRY_LO0);
-	MTC0(entrylo, MIPS_CP0_ENTRY_LO1);
-	MTC0(entryho, MIPS_CP0_ENTRY_HO);
-	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(3), MIPS_CP0_INDEX);
-	MFC0(index, MIPS_CP0_INDEX);
-	if ((index & MIPS_CP0_INDEX_INDEX) != MIPS_CP0_INDEX_INDEX_INDEX(3)) {
-		k_puts("Uh-oh, something has gone awry");
-	}
+	MTC0(0, MIPS_CP0_INDEX);
+	MTC0(MIPS_CP0_PAGE_MASK_MASK_4K, MIPS_CP0_PAGE_MASK);
 	TLBWI();
 
-	MTC0(MIPS_CP0_ENTRY_HO_VPN2_VPN2(0x5000000), MIPS_CP0_ENTRY_HO);
-	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(24), MIPS_CP0_INDEX);
-	TLBP();
-	MFC0(index, MIPS_CP0_INDEX);
+	MTC0(1, MIPS_CP0_INDEX);
+	MTC0(MIPS_CP0_PAGE_MASK_MASK_16K, MIPS_CP0_PAGE_MASK);
+	TLBWI();
 
-	if ((index & MIPS_CP0_INDEX_P) || (index & MIPS_CP0_INDEX_INDEX) != MIPS_CP0_INDEX_INDEX_INDEX(3)) {
-		k_puts("TLBP unsuccessful");
+	MTC0(0, MIPS_CP0_INDEX);
+	TLBR();
+	MFC0(mask, MIPS_CP0_PAGE_MASK);
+
+	if ((mask & MIPS_CP0_PAGE_MASK_MASK) == MIPS_CP0_PAGE_MASK_MASK_4K) {
+		k_puts("4k mask succeeded");
 	} else {
-		k_puts("TLBP successful");
+		k_puts("4k mask failed");
 	}
 
-	MFC0(status, MIPS_CP0_STATUS);
-	status &= ~(MIPS_CP0_STATUS_ERL | MIPS_CP0_STATUS_EXL);
-	status &= ~MIPS_CP0_STATUS_KSU;
-	status |= MIPS_CP0_STATUS_KSU_K;
-	MTC0(status, MIPS_CP0_STATUS);
+	MTC0(1, MIPS_CP0_INDEX);
+	TLBR();
+	MFC0(mask, MIPS_CP0_PAGE_MASK);
 
-	ou_uint32_t *write = 0x5000000, *read = 0x86000000;
-	*write = 0xCAFEBABE;
-	if ((*read) == 0xCAFEBABE) {
-		k_puts("Read/write successful");
+	if ((mask & MIPS_CP0_PAGE_MASK_MASK) == MIPS_CP0_PAGE_MASK_MASK_16K) {
+		k_puts("16k mask succeeded");
 	} else {
-		k_puts("Read/write unsuccessful");
+		k_puts("16k mask failed");
 	}
 }
