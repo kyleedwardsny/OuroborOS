@@ -15,34 +15,34 @@ struct mips_tlb_entry {
 #define mips_cp_xstr(r, s)	mips_cp_str(r, s)
 #define mips_cp_str(r, s)	#r "," #s
 
-#define MTC0(expr, reg)									\
-do {											\
-	__asm__("mtc0 %[mips_reg], " mips_cp_xstr(reg) : : [mips_reg] "r" (expr));	\
+#define MTC0(expr, reg)										\
+do {												\
+	__asm__ volatile("mtc0 %[mips_reg], " mips_cp_xstr(reg) : : [mips_reg] "r" (expr));	\
 } while (0)
 
-#define MFC0(var, reg)									\
-do {											\
-	__asm__("mfc0 %[mips_reg], " mips_cp_xstr(reg) : [mips_reg] "=r" (var) :);	\
+#define MFC0(var, reg)										\
+do {												\
+	__asm__ volatile("mfc0 %[mips_reg], " mips_cp_xstr(reg) : [mips_reg] "=r" (var) :);	\
 } while (0)
 
-#define TLBR()			\
-do {				\
-	__asm__("tlbr" : :);	\
+#define TLBR()				\
+do {					\
+	__asm__ volatile("tlbr" : :);	\
 } while (0)
 
-#define TLBWI()			\
-do {				\
-	__asm__("tlbwi" : :);	\
+#define TLBWI()				\
+do {					\
+	__asm__ volatile("tlbwi" : :);	\
 } while (0)
 
-#define TLBWR()			\
-do {				\
-	__asm__("tlbwr" : :);	\
+#define TLBWR()				\
+do {					\
+	__asm__ volatile("tlbwr" : :);	\
 } while (0)
 
-#define TLBP()			\
-do {				\
-	__asm__("tlbp" : :);	\
+#define TLBP()				\
+do {					\
+	__asm__ volatile("tlbp" : :);	\
 } while (0)
 
 #endif /* __ASSEMBLER__ */
@@ -316,6 +316,7 @@ do {				\
 
 /* Exception Base */
 #define MIPS_CP0_EBASE_EB			(0x3FFFF000)
+#define MIPS_CP0_EBASE_EB_EB(a)			((a) & MIPS_CP0_EBASE_EB)
 /* CPU Number */
 #define MIPS_CP0_EBASE_CPUNUM			(0x000003FF)
 

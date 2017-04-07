@@ -9,6 +9,8 @@
 #define CMDLINE_ARGV_BUF_LENGTH	(8192)
 #define CMDLINE_ARGV_LENGTH	(512)
 
+void _syscall(void);
+
 static char cmdline_argv_buf[CMDLINE_ARGV_BUF_LENGTH];
 
 static int cmdline_argc;
@@ -119,15 +121,17 @@ void k_hang(void)
 	for (;;);
 }
 
+char exception_vector_table[];
+
+ou_uint32_t do_syscall(ou_uint32_t value);
+
 void k_main(void)
 {
+	/* Get the number of TLB entries available */
 	ou_uint32_t config1;
-	unsigned int mmu_size;
-	struct mips_tlb_entry tlb_entry;
-	ou_uint32_t index;
 	ou_uint32_t status;
-	ou_uint32_t *write = (ou_uint32_t *) 0x86000000;
-	ou_uint32_t *read = (ou_uint32_t *) 0x05000000;
+	ou_uint32_t myval = 17;
+	unsigned int mmu_size;
 
 	MFC0(config1, MIPS_CP0_CONFIG1);
 
@@ -138,16 +142,30 @@ void k_main(void)
 		k_hang();
 	}
 
-	tlb_entry.entry_lo0 = MIPS_CP0_ENTRY_LO_PFN_PFN(0x06000000) | MIPS_CP0_ENTRY_LO_C_U | MIPS_CP0_ENTRY_LO_V;
-	tlb_entry.entry_lo1 = 0; /* Not valid */
-	tlb_entry.entry_ho = MIPS_CP0_ENTRY_HO_VPN2_VPN2(0x05000000) | MIPS_CP0_ENTRY_HO_ASID_ASID(12);
-	tlb_entry.page_mask = MIPS_CP0_PAGE_MASK_MASK_4K;
+	/* Leave error mode while staying in kernel mode */
+	MFC0(status, MIPS_CP0_STATUS);
+	status |= MIPS_CP0_STATUS_BEV;
+	MTC0(status, MIPS_CP0_STATUS);
 
-	set_tlb_entry(-1, &tlb_entry);
+	/* Set exception vector base */
+	MTC0(MIPS_CP0_EBASE_EB_EB((unsigned long) exception_vector_table), MIPS_CP0_EBASE);
 
-	for (index = 0; index < 1000000; index++);
-	MFC0(index, MIPS_CP0_INDEX);
-	TLBP();
-	MFC0(index, MIPS_CP0_INDEX);
-	MFC0(index, MIPS_CP0_RANDOM);
+	/* Set BEV mode to normal */
+	MFC0(status, MIPS_CP0_STATUS);
+	status &= ~MIPS_CP0_STATUS_BEV;
+	MTC0(status, MIPS_CP0_STATUS);
+
+	MFC0(status, MIPS_CP0_STATUS);
+	status &= ~(MIPS_CP0_STATUS_ERL | MIPS_CP0_STATUS_EXL | MIPS_CP0_STATUS_KSU);
+	status |= MIPS_CP0_STATUS_KSU_K;
+	MTC0(status, MIPS_CP0_STATUS);
+
+	/* Do our syscall */
+	myval = do_syscall(myval);
+
+	if (myval == 17 + 16) {
+		k_puts("syscall succeeded!");
+	} else {
+		k_puts("syscall failed");
+	}
 }
