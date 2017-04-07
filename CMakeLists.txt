@@ -80,8 +80,7 @@ configure_file("include/ouroboros/stdint.h.in" "include/ouroboros/stdint.h")
 
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include")
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -nostdlib -nostdinc -nodefaultlibs -ffreestanding -static -mno-abicalls")
-set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} -nostdlib -nostdinc -nodefaultlibs -ffreestanding -static -mno-abicalls")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffreestanding -G0")
 
 add_subdirectory("libou")
 add_subdirectory("kernel")
