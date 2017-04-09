@@ -6,16 +6,6 @@
 #include <ouroboros/stdlib.h>
 #include <ouroboros/string.h>
 
-#define CMDLINE_ARGV_BUF_LENGTH	(8192)
-#define CMDLINE_ARGV_LENGTH	(512)
-
-void _syscall(void);
-
-static char cmdline_argv_buf[CMDLINE_ARGV_BUF_LENGTH];
-
-static int cmdline_argc;
-static char *cmdline_argv[CMDLINE_ARGV_LENGTH];
-
 static struct uart_16550 *uart = (struct uart_16550 *) 0x940003F8;
 
 static void k_putchar(char c)
@@ -121,10 +111,6 @@ void k_hang(void)
 	for (;;);
 }
 
-char exception_vector_table[];
-
-ou_uint32_t do_syscall(ou_uint32_t value);
-
 void k_main(void)
 {
 	/* Get the number of TLB entries available */
@@ -140,32 +126,5 @@ void k_main(void)
 		num_tlb_pages = mmu_size + 1;
 	} else {
 		k_hang();
-	}
-
-	/* Leave error mode while staying in kernel mode */
-	MFC0(status, MIPS_CP0_STATUS);
-	status |= MIPS_CP0_STATUS_BEV;
-	MTC0(status, MIPS_CP0_STATUS);
-
-	/* Set exception vector base */
-	MTC0(MIPS_CP0_EBASE_EB_EB((unsigned long) exception_vector_table), MIPS_CP0_EBASE);
-
-	/* Set BEV mode to normal */
-	MFC0(status, MIPS_CP0_STATUS);
-	status &= ~MIPS_CP0_STATUS_BEV;
-	MTC0(status, MIPS_CP0_STATUS);
-
-	MFC0(status, MIPS_CP0_STATUS);
-	status &= ~(MIPS_CP0_STATUS_ERL | MIPS_CP0_STATUS_EXL | MIPS_CP0_STATUS_KSU);
-	status |= MIPS_CP0_STATUS_KSU_K;
-	MTC0(status, MIPS_CP0_STATUS);
-
-	/* Do our syscall */
-	myval = do_syscall(myval);
-
-	if (myval == 17 + 16) {
-		k_puts("syscall succeeded!");
-	} else {
-		k_puts("syscall failed");
 	}
 }
