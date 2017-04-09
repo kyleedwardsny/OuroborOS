@@ -1,9 +1,12 @@
+INCLUDE config.ld
+
 SECTIONS
 {
-	. = 0x80010000;
+	. = KERNEL_LOAD_ADDR;
 
 	.text :
 	{
+		*(.text.start)
 		*(.text)
 	}
 
@@ -43,5 +46,8 @@ SECTIONS
 	_stack_top = ABSOLUTE(.);
 	. += 0x1000;
 	_stack_bottom = ABSOLUTE(.);
+
+	_initrd_begin = 0x80200000;
+	_initrd_end = 0x80300000;
 }
 ENTRY(_start)

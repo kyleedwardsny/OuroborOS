@@ -1,0 +1,10 @@
+&ou_ikernel {
+	description = "OuroborOS kernel";
+	data = /incbin/("../kernel.bin");
+	type = "kernel";
+	arch = "mips";
+	os = "linux";
+	compression = "none";
+	load = <@KERNEL_LOAD_ADDR@>;
+	entry = <@KERNEL_LOAD_ADDR@>;
+};

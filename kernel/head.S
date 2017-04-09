@@ -1,7 +1,7 @@
 #include <ouroboros/hw/uart/16550.h>
 #include <ouroboros/arch/mips/cp0.h>
 
-	.section .text
+	.section .text.start
 
 	.global _start
 	.type _start, function
