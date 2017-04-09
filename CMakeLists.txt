@@ -94,7 +94,7 @@ add_custom_command(
 		-f "${IMAGE_ITS}"
 		-D "-i ${KERNEL_FIT} -O dtb"
 		"${IMAGE_ITB}"
-	DEPENDS "${IMAGE_ITS}" "${KERNEL_FIT}/kernel.itsi" kernel-bin
+	DEPENDS "${IMAGE_ITS}" "${KERNEL_FIT}/kernel.itsi" kernel-bin "${CMAKE_CURRENT_BINARY_DIR}/kernel/kernel.bin"
 )
 add_custom_target(itb ALL DEPENDS "${IMAGE_ITB}")
 

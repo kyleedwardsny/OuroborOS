@@ -16,6 +16,7 @@ add_custom_command(
 		-O binary
 		$<TARGET_FILE:kernel.elf>
 		"${KERNEL_BIN}"
+	DEPENDS $<TARGET_FILE:kernel.elf>
 )
 add_custom_target(kernel-bin DEPENDS "${KERNEL_BIN}")
 
