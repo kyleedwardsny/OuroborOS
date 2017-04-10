@@ -1,11 +1,11 @@
 #include <ouroboros/hw/uart/16550.h>
 #include <ouroboros/arch/mips/cp0.h>
-#include <ouroboros/arch/mips/uhi.h>
 #include <ouroboros/common.h>
 #include <ouroboros/kernel/eat_self.h>
-#include <ouroboros/stdint.h>
 #include <ouroboros/stdlib.h>
 #include <ouroboros/string.h>
+
+#include <stdint.h>
 
 static struct uart_16550 *uart = (struct uart_16550 *) 0x940003F8;
 
@@ -25,7 +25,7 @@ static void k_puts(const char *str)
 
 static int num_tlb_pages = -1;
 
-static int check_entry_lo_validity(ou_uint32_t entry_lo)
+static int check_entry_lo_validity(uint32_t entry_lo)
 {
 	if (entry_lo & BITS(31, 26)) {
 		return -1;
@@ -110,9 +110,9 @@ static int set_tlb_entry(int index, const struct mips_tlb_entry *entry)
 void k_main(void)
 {
 	/* Get the number of TLB entries available */
-	ou_uint32_t config1;
-	ou_uint32_t status;
-	ou_uint32_t myval = 17;
+	uint32_t config1;
+	uint32_t status;
+	uint32_t myval = 17;
 	unsigned int mmu_size;
 
 	MFC0(config1, MIPS_CP0_CONFIG1);

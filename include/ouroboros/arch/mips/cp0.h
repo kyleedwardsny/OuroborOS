@@ -3,13 +3,13 @@
 
 #ifndef __ASSEMBLER__
 
-#include <ouroboros/stdint.h>
+#include <stdint.h>
 
 struct mips_tlb_entry {
-	ou_uint32_t entry_lo0;
-	ou_uint32_t entry_lo1;
-	ou_uint32_t entry_ho;
-	ou_uint32_t page_mask;
+	uint32_t entry_lo0;
+	uint32_t entry_lo1;
+	uint32_t entry_ho;
+	uint32_t page_mask;
 };
 
 #define mips_cp_xstr(r, s)	mips_cp_str(r, s)
