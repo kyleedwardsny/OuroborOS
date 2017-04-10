@@ -27,7 +27,7 @@ _start:
 0:
 	la $sp, _stack_bottom
 
-	jal k_main
+	jal k_main_args
 
 0:
 	b 0b

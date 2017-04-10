@@ -21,5 +21,5 @@ add_custom_command(
 add_custom_target(kernel-bin DEPENDS "${KERNEL_BIN}")
 
 add_executable(kernel.elf head.S main.c eat_self.c)
-target_link_libraries(kernel.elf ou)
+target_link_libraries(kernel.elf ou ou_fdt)
 set_property(TARGET kernel.elf APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/kernel.ld")
