@@ -5,13 +5,21 @@
 	#address-cells = <1>;
 
 	images {
-		ou_ikernel: kernel@1{
+		ou_ikernel: kernel@1 {
 			hash@1 {
 				algo = "crc32";
 			};
 			hash@2 {
 				algo = "sha1";
 			};
+		};
+
+		fdt@1 {
+			description = "my-fdt";
+			data = /incbin/("dts/qemu_mips.dtb");
+			type = "flat_dt";
+			arch = "mips";
+			compression = "none";
 		};
 	};
 
@@ -20,6 +28,7 @@
 		config@1 {
 			description = "Boot OuroborOS";
 			kernel = "kernel@1";
+			fdt = "fdt@1";
 		};
 	};
 };

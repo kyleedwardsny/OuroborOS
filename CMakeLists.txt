@@ -83,6 +83,7 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINAR
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffreestanding -G0")
 
 find_program(MKIMAGE mkimage DOC "U-Boot uImage creator")
+find_program(DTC dtc DOC "Device tree compiler")
 
 set(IMAGE_ITB "${CMAKE_CURRENT_BINARY_DIR}/image.itb")
 set(IMAGE_ITS "${CMAKE_CURRENT_SOURCE_DIR}/image.its")
@@ -92,11 +93,13 @@ add_custom_command(
 	OUTPUT "${IMAGE_ITB}"
 	COMMAND "${MKIMAGE}"
 		-f "${IMAGE_ITS}"
-		-D "-i ${KERNEL_FIT} -O dtb"
+		-D "-i ${KERNEL_FIT} -i ${CMAKE_CURRENT_BINARY_DIR} -O dtb"
 		"${IMAGE_ITB}"
-	DEPENDS "${IMAGE_ITS}" "${KERNEL_FIT}/kernel.itsi" kernel-bin "${CMAKE_CURRENT_BINARY_DIR}/kernel/kernel.bin"
+	DEPENDS "${IMAGE_ITS}" "${KERNEL_FIT}/kernel.itsi" kernel-bin "${CMAKE_CURRENT_BINARY_DIR}/kernel/kernel.bin" dtb "${CMAKE_CURRENT_BINARY_DIR}/dts/qemu_mips.dtb"
 )
 add_custom_target(itb ALL DEPENDS "${IMAGE_ITB}")
+
+include("dts.cmake")
 
 add_subdirectory("libou")
 add_subdirectory("kernel")
