@@ -2,6 +2,7 @@
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/uhi.h>
 #include <ouroboros/common.h>
+#include <ouroboros/kernel/eat_self.h>
 #include <ouroboros/stdint.h>
 #include <ouroboros/stdlib.h>
 #include <ouroboros/string.h>
@@ -106,11 +107,6 @@ static int set_tlb_entry(int index, const struct mips_tlb_entry *entry)
 	return 0;
 }
 
-void k_hang(void)
-{
-	for (;;);
-}
-
 void k_main(void)
 {
 	/* Get the number of TLB entries available */
@@ -125,6 +121,6 @@ void k_main(void)
 	if (mmu_size > 0) {
 		num_tlb_pages = mmu_size + 1;
 	} else {
-		k_hang();
+		k_eat_self("Must have at least 1 TLB page");
 	}
 }
