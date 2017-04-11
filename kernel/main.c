@@ -3,6 +3,7 @@
 #include <ouroboros/fdt.h>
 #include <ouroboros/hw/uart/16550.h>
 #include <ouroboros/kernel/eat_self.h>
+#include <ouroboros/stdio.h>
 #include <ouroboros/stdlib.h>
 #include <ouroboros/string.h>
 
@@ -138,6 +139,9 @@ void k_main(void)
 	uint32_t status;
 	uint32_t myval = 17;
 	unsigned int mmu_size;
+	int result;
+
+	char buf[256];
 
 	MFC0(config1, MIPS_CP0_CONFIG1);
 
@@ -147,4 +151,7 @@ void k_main(void)
 	} else {
 		k_eat_self("Must have at least 1 TLB page");
 	}
+
+	result = ou_sprintf(buf, "This is a test %c %p (%s) %%", '+', (const void *) 0xd00dfeed, "Hello world!");
+	k_puts(buf);
 }
