@@ -45,6 +45,151 @@ static void byte_to_hex(char *hex, uint8_t byte, int lower)
 	hex[1] = hex_table[(byte >> 0) & 0xF];
 }
 
+static int print_hex(write_cb write_cb, void *cb_data, unsigned long long num, unsigned int flags, int min_characters, int precision, int lower)
+{
+	int retval = -1;
+	/* 1 for + sign, 2 for 0x prefix, and room for 2 copies of num to account for justification */
+	char buf[1 + 2 + sizeof(num) * 2 + sizeof(num) * 2];
+	size_t num_digits = sizeof(num) * 2;
+	size_t num_zeroes = 0;
+	size_t num_spaces = 0;
+	size_t total_length;
+	unsigned long long mask = 0xF000000000000000;
+	size_t index = 1 + 2;
+	const char *prefix = NULL;
+	char chr;
+	size_t i;
+	uint8_t digit;
+
+	while (!(num & mask) && mask) {
+		mask >>= 4;
+		num_digits--;
+		index++;
+	}
+
+	if (num_digits <= 0) {
+		num_digits = 0;
+	}
+
+	if (precision > (int) num_digits) { /* Don't need to check if precision > 0, because it will be if this evaluates to true */
+		num_zeroes = precision - num_digits;
+	}
+
+	total_length = num_zeroes + num_digits;
+	if (flags & FLAGS_HEX_OCTAL_PREFIX) {
+		prefix = lower ? "0x" : "0X";
+		total_length += 2;
+	}
+
+	if (min_characters > (int) total_length) {
+		if (flags & FLAGS_LEFT_PAD_ZEROES) {
+			num_zeroes = min_characters - (total_length - num_digits - num_zeroes);
+		} else {
+			num_spaces = min_characters - total_length;
+		}
+		total_length = min_characters;
+	}
+
+	if (!(flags & FLAGS_LEFT_JUSTIFY)) {
+		for (i = 0; i < num_spaces; i++) {
+			if (write_cb(cb_data, " ", 1) < 0) {
+				goto ret;
+			}
+		}
+	}
+
+	if (prefix) {
+		if (write_cb(cb_data, prefix, ou_strlen(prefix)) < 0) {
+			goto ret;
+		}
+	}
+
+	for (i = 0; i < num_zeroes; i++) {
+		if (write_cb(cb_data, "0", 1) < 0) {
+			goto ret;
+		}
+	}
+
+	for (i = 0; i < num_digits; i++) {
+		digit = (num >> ((num_digits - i - 1) * 4)) & 0xF;
+		chr = lower ? HEX_LOWER[digit] : HEX_UPPER[digit];
+		if (write_cb(cb_data, &chr, 1) < 0) {
+			goto ret;
+		}
+	}
+
+	if (flags & FLAGS_LEFT_JUSTIFY) {
+		for (i = 0; i < num_spaces; i++) {
+			if (write_cb(cb_data, " ", 1) < 0) {
+				goto ret;
+			}
+		}
+	}
+
+	/* Success */
+	retval = total_length;
+ret:
+	return retval;
+}
+
+static long long get_int_argument_signed(va_list *args, unsigned int length)
+{
+	switch (length) {
+	case LENGTH_HH:
+		return (char) va_arg(*args, int);
+
+	case LENGTH_H:
+		return (short) va_arg(*args, int);
+
+	case LENGTH_L:
+		return va_arg(*args, long);
+
+	case LENGTH_LL:
+		return va_arg(*args, long long);
+
+	case LENGTH_J:
+		return va_arg(*args, intmax_t);
+
+	case LENGTH_Z:
+		return va_arg(*args, size_t);
+
+	case LENGTH_T:
+		return va_arg(*args, ptrdiff_t);
+
+	default:
+		return va_arg(*args, int);
+	}
+}
+
+static unsigned long long get_int_argument_unsigned(va_list *args, unsigned int length)
+{
+	switch (length) {
+	case LENGTH_HH:
+		return (unsigned char) va_arg(*args, unsigned int);
+
+	case LENGTH_H:
+		return (unsigned short) va_arg(*args, unsigned int);
+
+	case LENGTH_L:
+		return va_arg(*args, unsigned long);
+
+	case LENGTH_LL:
+		return va_arg(*args, unsigned long long);
+
+	case LENGTH_J:
+		return va_arg(*args, intmax_t);
+
+	case LENGTH_Z:
+		return va_arg(*args, size_t);
+
+	case LENGTH_T:
+		return va_arg(*args, ptrdiff_t);
+
+	default:
+		return va_arg(*args, unsigned int);
+	}
+}
+
 static int print_pointer(write_cb write_cb, void *cb_data, const void *ptr)
 {
 	int retval = -1;
@@ -96,6 +241,9 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 	int *written_arg;
 	const void *ptr;
 	int result;
+
+	unsigned long long unum;
+	long long num;
 
 	stop = 0;
 	while (!stop) {
@@ -215,54 +363,77 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 	case 'd':
 	case 'i':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'u':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'o':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'x':
-		/* TODO */
+		unum = get_int_argument_unsigned(args, length);
+		result = print_hex(write_cb, cb_data, unum, flags, min_characters, precision, 1);
+		if (result < 0) {
+			goto ret;
+		}
+		total_len += result;
+		(*format)++;
 		break;
 
 	case 'X':
-		/* TODO */
+		unum = get_int_argument_unsigned(args, length);
+		result = print_hex(write_cb, cb_data, unum, flags, min_characters, precision, 0);
+		if (result < 0) {
+			goto ret;
+		}
+		total_len += result;
+		(*format)++;
 		break;
 
 	case 'f':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'F':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'e':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'E':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'g':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'G':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'a':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'A':
 		/* TODO */
+		(*format)++;
 		break;
 
 	case 'c':
