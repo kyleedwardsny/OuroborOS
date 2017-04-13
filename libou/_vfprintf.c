@@ -45,7 +45,7 @@ static void byte_to_hex(char *hex, uint8_t byte, int lower)
 	hex[1] = hex_table[(byte >> 0) & 0xF];
 }
 
-static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long num, int sign, unsigned int flags, int min_characters, int precision)
+static int print_number(write_cb write_cb, void *cb_data, unsigned int base, unsigned long long num, int sign, unsigned int flags, int min_characters, int precision, int lower)
 {
 	int retval = -1;
 	size_t num_digits = 0;
@@ -55,10 +55,10 @@ static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long nu
 	size_t i;
 	size_t j;
 	unsigned long long tmp = num;
-	char chr;
+	const char *chrmap = lower ? HEX_LOWER : HEX_UPPER;
 
 	while (tmp > 0) {
-		tmp /= 10;
+		tmp /= base;
 		num_digits++;
 	}
 
@@ -67,8 +67,25 @@ static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long nu
 	}
 
 	total_length = num_zeroes + num_digits;
-	if (flags & FLAGS_FORCE_SIGN || sign < 0) {
-		total_length++;
+
+	switch (base) {
+	case 10:
+		if (flags & FLAGS_FORCE_SIGN || sign < 0) {
+			total_length++;
+		}
+		break;
+
+	case 8:
+		if (flags & FLAGS_HEX_OCTAL_PREFIX) {
+			total_length++;
+		}
+		break;
+
+	case 16:
+		if (flags & FLAGS_HEX_OCTAL_PREFIX) {
+			total_length += 2;
+		}
+		break;
 	}
 
 	if (min_characters > (int) total_length) {
@@ -88,14 +105,34 @@ static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long nu
 		}
 	}
 
-	if (flags & FLAGS_FORCE_SIGN && sign >= 0) {
-		if (write_cb(cb_data, "+", 1) < 0) {
-			goto ret;
+	switch (base) {
+	case 10:
+		if (flags & FLAGS_FORCE_SIGN && sign >= 0) {
+			if (write_cb(cb_data, "+", 1) < 0) {
+				goto ret;
+			}
+		} else if (sign < 0) {
+			if (write_cb(cb_data, "-", 1) < 0) {
+				goto ret;
+			}
 		}
-	} else if (sign < 0) {
-		if (write_cb(cb_data, "-", 1) < 0) {
-			goto ret;
+		break;
+
+	case 8:
+		if (flags & FLAGS_HEX_OCTAL_PREFIX) {
+			if (write_cb(cb_data, "0", 1) < 0) {
+				goto ret;
+			}
 		}
+		break;
+
+	case 16:
+		if (flags & FLAGS_HEX_OCTAL_PREFIX) {
+			if (write_cb(cb_data, lower ? "0x" : "0X", 2) < 0) {
+				goto ret;
+			}
+		}
+		break;
 	}
 
 	for (i = 0; i < num_zeroes; i++) {
@@ -107,10 +144,9 @@ static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long nu
 	for (i = 0; i < num_digits; i++) {
 		tmp = num;
 		for (j = 0; j < num_digits - i - 1; j++) {
-			tmp /= 10;
+			tmp /= base;
 		}
-		chr = (tmp % 10) + '0';
-		if (write_cb(cb_data, &chr, 1) < 0) {
+		if (write_cb(cb_data, &chrmap[tmp % base], 1) < 0) {
 			goto ret;
 		}
 	}
@@ -125,87 +161,6 @@ static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long nu
 
 	/* Success */
 	retval = num_digits;
-ret:
-	return retval;
-}
-
-static int print_hex(write_cb write_cb, void *cb_data, unsigned long long num, unsigned int flags, int min_characters, int precision, int lower)
-{
-	int retval = -1;
-	size_t num_digits = sizeof(num) * 2;
-	size_t num_zeroes = 0;
-	size_t num_spaces = 0;
-	size_t total_length;
-	unsigned long long mask = 0xF000000000000000;
-	size_t index = 1 + 2;
-	const char *prefix = NULL;
-	char chr;
-	size_t i;
-	uint8_t digit;
-
-	while (!(num & mask) && mask) {
-		mask >>= 4;
-		num_digits--;
-		index++;
-	}
-
-	if (precision > (int) num_digits) { /* Don't need to check if precision > 0, because it will be if this evaluates to true */
-		num_zeroes = precision - num_digits;
-	}
-
-	total_length = num_zeroes + num_digits;
-	if (flags & FLAGS_HEX_OCTAL_PREFIX) {
-		prefix = lower ? "0x" : "0X";
-		total_length += 2;
-	}
-
-	if (min_characters > (int) total_length) {
-		if (flags & FLAGS_LEFT_PAD_ZEROES) {
-			num_zeroes += min_characters - total_length;
-		} else {
-			num_spaces = min_characters - total_length;
-		}
-		total_length = min_characters;
-	}
-
-	if (!(flags & FLAGS_LEFT_JUSTIFY)) {
-		for (i = 0; i < num_spaces; i++) {
-			if (write_cb(cb_data, " ", 1) < 0) {
-				goto ret;
-			}
-		}
-	}
-
-	if (prefix) {
-		if (write_cb(cb_data, prefix, ou_strlen(prefix)) < 0) {
-			goto ret;
-		}
-	}
-
-	for (i = 0; i < num_zeroes; i++) {
-		if (write_cb(cb_data, "0", 1) < 0) {
-			goto ret;
-		}
-	}
-
-	for (i = 0; i < num_digits; i++) {
-		digit = (num >> ((num_digits - i - 1) * 4)) & 0xF;
-		chr = lower ? HEX_LOWER[digit] : HEX_UPPER[digit];
-		if (write_cb(cb_data, &chr, 1) < 0) {
-			goto ret;
-		}
-	}
-
-	if (flags & FLAGS_LEFT_JUSTIFY) {
-		for (i = 0; i < num_spaces; i++) {
-			if (write_cb(cb_data, " ", 1) < 0) {
-				goto ret;
-			}
-		}
-	}
-
-	/* Success */
-	retval = total_length;
 ret:
 	return retval;
 }
@@ -452,7 +407,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 			unum = num;
 			sign = 0;
 		}
-		result = print_decimal(write_cb, cb_data, unum, sign, flags, min_characters, precision);
+		result = print_number(write_cb, cb_data, 10, unum, sign, flags, min_characters, precision, 0);
 		if (result < 0) {
 			goto ret;
 		}
@@ -462,7 +417,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	case 'u':
 		unum = get_int_argument_unsigned(args, length);
-		result = print_decimal(write_cb, cb_data, unum, 1, flags, min_characters, precision);
+		result = print_number(write_cb, cb_data, 10, unum, 1, flags, min_characters, precision, 0);
 		if (result < 0) {
 			goto ret;
 		}
@@ -477,7 +432,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	case 'x':
 		unum = get_int_argument_unsigned(args, length);
-		result = print_hex(write_cb, cb_data, unum, flags, min_characters, precision, 1);
+		result = print_number(write_cb, cb_data, 16, unum, 1, flags, min_characters, precision, 1);
 		if (result < 0) {
 			goto ret;
 		}
@@ -487,7 +442,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	case 'X':
 		unum = get_int_argument_unsigned(args, length);
-		result = print_hex(write_cb, cb_data, unum, flags, min_characters, precision, 0);
+		result = print_number(write_cb, cb_data, 16, unum, 1, flags, min_characters, precision, 0);
 		if (result < 0) {
 			goto ret;
 		}
