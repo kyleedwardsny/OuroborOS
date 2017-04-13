@@ -160,7 +160,7 @@ static int print_number(write_cb write_cb, void *cb_data, unsigned int base, uns
 	}
 
 	/* Success */
-	retval = num_digits;
+	retval = total_length;
 ret:
 	return retval;
 }
@@ -431,6 +431,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 		if (result < 0) {
 			goto ret;
 		}
+		total_len += result;
 		(*format)++;
 		break;
 
@@ -456,43 +457,35 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	case 'f':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'F':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'e':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'E':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'g':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'G':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'a':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'A':
 		/* TODO */
-		(*format)++;
-		break;
+		goto ret;
 
 	case 'c':
 		chr = va_arg(*args, int);

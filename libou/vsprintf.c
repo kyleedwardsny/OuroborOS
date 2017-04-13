@@ -13,8 +13,8 @@ int ou_vsprintf(char *str, const char *format, va_list args)
 	int result;
 
 	result = _ou_vfprintf(write_str, &str, format, args);
-	if (result > 0) {
-		str[result] = '\0';
+	if (result >= 0) {
+		*str = '\0';
 	}
 
 	return result;

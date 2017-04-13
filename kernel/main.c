@@ -141,7 +141,7 @@ void k_main(void)
 	unsigned int mmu_size;
 	int result;
 
-	char buf[256];
+	char buf[] = "abcdefghijklmnopqrstuvwxyz";
 
 	MFC0(config1, MIPS_CP0_CONFIG1);
 
