@@ -152,6 +152,6 @@ void k_main(void)
 		k_eat_self("Must have at least 1 TLB page");
 	}
 
-	result = ou_sprintf(buf, "%-#032.20X", 0xd00dfeed);
+	result = ou_sprintf(buf, "%hx", 0x12345678);
 	k_puts(buf);
 }

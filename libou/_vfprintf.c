@@ -313,23 +313,23 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	switch (**format) {
 	case 'h':
+		(*format)++;
 		if (**format == 'h') {
 			length = LENGTH_HH;
 			(*format)++;
 		} else {
 			length = LENGTH_H;
 		}
-		(*format)++;
 		break;
 
 	case 'l':
+		(*format)++;
 		if (**format == 'l') {
 			length = LENGTH_LL;
 			(*format)++;
 		} else {
 			length = LENGTH_L;
 		}
-		(*format)++;
 		break;
 
 	case 'j':
