@@ -45,11 +45,93 @@ static void byte_to_hex(char *hex, uint8_t byte, int lower)
 	hex[1] = hex_table[(byte >> 0) & 0xF];
 }
 
+static int print_decimal(write_cb write_cb, void *cb_data, unsigned long long num, int sign, unsigned int flags, int min_characters, int precision)
+{
+	int retval = -1;
+	size_t num_digits = 0;
+	size_t num_zeroes = 0;
+	size_t num_spaces = 0;
+	size_t total_length;
+	size_t i;
+	size_t j;
+	unsigned long long tmp = num;
+	char chr;
+
+	while (tmp > 0) {
+		tmp /= 10;
+		num_digits++;
+	}
+
+	if (precision > (int) num_digits) { /* Don't need to check if precision > 0, because it will be if this evaluates to true */
+		num_zeroes = precision - num_digits;
+	}
+
+	total_length = num_zeroes + num_digits;
+	if (flags & FLAGS_FORCE_SIGN || sign < 0) {
+		total_length++;
+	}
+
+	if (min_characters > (int) total_length) {
+		if (flags & FLAGS_LEFT_PAD_ZEROES) {
+			num_zeroes += min_characters - total_length;
+		} else {
+			num_spaces = min_characters - total_length;
+		}
+		total_length = min_characters;
+	}
+
+	if (!(flags & FLAGS_LEFT_JUSTIFY)) {
+		for (i = 0; i < num_spaces; i++) {
+			if (write_cb(cb_data, " ", 1) < 0) {
+				goto ret;
+			}
+		}
+	}
+
+	if (flags & FLAGS_FORCE_SIGN && sign >= 0) {
+		if (write_cb(cb_data, "+", 1) < 0) {
+			goto ret;
+		}
+	} else if (sign < 0) {
+		if (write_cb(cb_data, "-", 1) < 0) {
+			goto ret;
+		}
+	}
+
+	for (i = 0; i < num_zeroes; i++) {
+		if (write_cb(cb_data, "0", 1) < 0) {
+			goto ret;
+		}
+	}
+
+	for (i = 0; i < num_digits; i++) {
+		tmp = num;
+		for (j = 0; j < num_digits - i - 1; j++) {
+			tmp /= 10;
+		}
+		chr = (tmp % 10) + '0';
+		if (write_cb(cb_data, &chr, 1) < 0) {
+			goto ret;
+		}
+	}
+
+	if (flags & FLAGS_LEFT_JUSTIFY) {
+		for (i = 0; i < num_spaces; i++) {
+			if (write_cb(cb_data, " ", 1) < 0) {
+				goto ret;
+			}
+		}
+	}
+
+	/* Success */
+	retval = num_digits;
+ret:
+	return retval;
+}
+
 static int print_hex(write_cb write_cb, void *cb_data, unsigned long long num, unsigned int flags, int min_characters, int precision, int lower)
 {
 	int retval = -1;
-	/* 1 for + sign, 2 for 0x prefix, and room for 2 copies of num to account for justification */
-	char buf[1 + 2 + sizeof(num) * 2 + sizeof(num) * 2];
 	size_t num_digits = sizeof(num) * 2;
 	size_t num_zeroes = 0;
 	size_t num_spaces = 0;
@@ -67,10 +149,6 @@ static int print_hex(write_cb write_cb, void *cb_data, unsigned long long num, u
 		index++;
 	}
 
-	if (num_digits <= 0) {
-		num_digits = 0;
-	}
-
 	if (precision > (int) num_digits) { /* Don't need to check if precision > 0, because it will be if this evaluates to true */
 		num_zeroes = precision - num_digits;
 	}
@@ -83,7 +161,7 @@ static int print_hex(write_cb write_cb, void *cb_data, unsigned long long num, u
 
 	if (min_characters > (int) total_length) {
 		if (flags & FLAGS_LEFT_PAD_ZEROES) {
-			num_zeroes = min_characters - (total_length - num_digits - num_zeroes);
+			num_zeroes += min_characters - total_length;
 		} else {
 			num_spaces = min_characters - total_length;
 		}
@@ -240,6 +318,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 	size_t str_len;
 	int *written_arg;
 	const void *ptr;
+	int sign;
 	int result;
 
 	unsigned long long unum;
@@ -362,12 +441,32 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	case 'd':
 	case 'i':
-		/* TODO */
+		num = get_int_argument_signed(args, length);
+		if (num < 0) {
+			unum = num * -1;
+			sign = -1;
+		} else if (num > 0) {
+			unum = num;
+			sign = 1;
+		} else {
+			unum = num;
+			sign = 0;
+		}
+		result = print_decimal(write_cb, cb_data, unum, sign, flags, min_characters, precision);
+		if (result < 0) {
+			goto ret;
+		}
+		total_len += result;
 		(*format)++;
 		break;
 
 	case 'u':
-		/* TODO */
+		unum = get_int_argument_unsigned(args, length);
+		result = print_decimal(write_cb, cb_data, unum, 1, flags, min_characters, precision);
+		if (result < 0) {
+			goto ret;
+		}
+		total_len += result;
 		(*format)++;
 		break;
 
