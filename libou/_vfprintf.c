@@ -426,7 +426,11 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 		break;
 
 	case 'o':
-		/* TODO */
+		unum = get_int_argument_unsigned(args, length);
+		result = print_number(write_cb, cb_data, 8, unum, 1, flags, min_characters, precision, 0);
+		if (result < 0) {
+			goto ret;
+		}
 		(*format)++;
 		break;
 
