@@ -1,6 +1,6 @@
 #include <ouroboros/string.h>
 
-extern char *ou_strcpy(char *dst, const char *src)
+char *ou_strcpy(char *dst, const char *src)
 {
 	char *dst2 = dst;
 
