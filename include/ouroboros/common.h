@@ -58,4 +58,6 @@
 
 #endif
 
+#define ALIGN(val, align)	((val) + (align) - 1 - (((val) + (align) - 1) % (align)))
+
 #endif /* OUROBOROS_COMMON_H */

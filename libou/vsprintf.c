@@ -1,7 +1,8 @@
 #include <ouroboros/stdio.h>
+
 #include <ouroboros/string.h>
 
-static ou_ssize_t write_str(void *cb_data, const void *data, size_t len)
+static ou_ssize_t write_str(void *cb_data, const void *data, ou_size_t len)
 {
 	ou_memcpy(*(char **) cb_data, data, len);
 	(*(char **) cb_data) += len;

@@ -4,30 +4,30 @@
 #ifndef __ASSEMBLER__
 
 #include <ouroboros/common.h>
-#include <stdint.h>
+#include <ouroboros/stdint.h>
 
 PACKED_STRUCT_BEGIN(uart_16550) {
 	union {
-		volatile uint8_t thr;
-		volatile uint8_t rbr;
-		volatile uint8_t dll;
+		volatile ou_uint8_t thr;
+		volatile ou_uint8_t rbr;
+		volatile ou_uint8_t dll;
 	} port0;
 
 	union {
-		volatile uint8_t ier;
-		volatile uint8_t dlh;
+		volatile ou_uint8_t ier;
+		volatile ou_uint8_t dlh;
 	} port1;
 
 	union {
-		volatile uint8_t iir;
-		volatile uint8_t fcr;
+		volatile ou_uint8_t iir;
+		volatile ou_uint8_t fcr;
 	} port2;
 
-	volatile uint8_t lcr;
-	volatile uint8_t mcr;
-	volatile uint8_t lsr;
-	volatile uint8_t msr;
-	volatile uint8_t sr;
+	volatile ou_uint8_t lcr;
+	volatile ou_uint8_t mcr;
+	volatile ou_uint8_t lsr;
+	volatile ou_uint8_t msr;
+	volatile ou_uint8_t sr;
 } PACKED_STRUCT_END;
 
 #endif /* __ASSEMBLER__ */

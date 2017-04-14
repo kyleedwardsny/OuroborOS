@@ -4,10 +4,9 @@
 #include <ouroboros/hw/uart/16550.h>
 #include <ouroboros/kernel/eat_self.h>
 #include <ouroboros/stdio.h>
+#include <ouroboros/stdint.h>
 #include <ouroboros/stdlib.h>
 #include <ouroboros/string.h>
-
-#include <stdint.h>
 
 static int k_putchar(struct uart_16550 *uart, int c)
 {
@@ -16,11 +15,11 @@ static int k_putchar(struct uart_16550 *uart, int c)
 	return c;
 }
 
-static ou_ssize_t k_write(void *cb_data, const void *data, size_t len)
+static ou_ssize_t k_write(void *cb_data, const void *data, ou_size_t len)
 {
 	struct uart_16550 *uart = cb_data;
-	size_t i;
-	const uint8_t *bytes = data;
+	ou_size_t i;
+	const ou_uint8_t *bytes = data;
 
 	for (i = 0; i < len; i++) {
 		k_putchar(uart, bytes[i]);
@@ -50,7 +49,7 @@ static int k_printf(const char *format, ...)
 
 static int num_tlb_pages = -1;
 
-static int check_entry_lo_validity(uint32_t entry_lo)
+static int check_entry_lo_validity(ou_uint32_t entry_lo)
 {
 	if (entry_lo & BITS(31, 26)) {
 		return -1;
@@ -157,7 +156,7 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 
 void k_main(void)
 {
-	uint32_t config1;
+	ou_uint32_t config1;
 	unsigned int mmu_size;
 
 	char buf[] = "abcdefghijklmnopqrstuvwxyz";

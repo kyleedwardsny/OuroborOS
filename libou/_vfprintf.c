@@ -1,7 +1,7 @@
 #include <ouroboros/stdio.h>
-#include <ouroboros/string.h>
 
-#include <stdint.h>
+#include <ouroboros/stdint.h>
+#include <ouroboros/string.h>
 
 #define FLAGS_LEFT_JUSTIFY	(0x01)
 #define FLAGS_FORCE_SIGN	(0x02)
@@ -26,12 +26,12 @@ struct specifier {
 	unsigned int length;
 };
 
-typedef ou_ssize_t (*write_cb)(void *cb_data, const void *data, size_t len);
+typedef ou_ssize_t (*write_cb)(void *cb_data, const void *data, ou_size_t len);
 
 static const char HEX_LOWER[] = "0123456789abcdef";
 static const char HEX_UPPER[] = "0123456789ABCDEF";
 
-static void byte_to_hex(char *hex, uint8_t byte, int lower)
+static void byte_to_hex(char *hex, ou_uint8_t byte, int lower)
 {
 	const char *hex_table;
 
@@ -48,12 +48,12 @@ static void byte_to_hex(char *hex, uint8_t byte, int lower)
 static int print_number(write_cb write_cb, void *cb_data, unsigned int base, unsigned long long num, int sign, unsigned int flags, int min_characters, int precision, int lower)
 {
 	int retval = -1;
-	size_t num_digits = 0;
-	size_t num_zeroes = 0;
-	size_t num_spaces = 0;
-	size_t total_length;
-	size_t i;
-	size_t j;
+	ou_size_t num_digits = 0;
+	ou_size_t num_zeroes = 0;
+	ou_size_t num_spaces = 0;
+	ou_size_t total_length;
+	ou_size_t i;
+	ou_size_t j;
 	unsigned long long tmp = num;
 	const char *chrmap = lower ? HEX_LOWER : HEX_UPPER;
 
@@ -181,13 +181,13 @@ static long long get_int_argument_signed(va_list *args, unsigned int length)
 		return va_arg(*args, long long);
 
 	case LENGTH_J:
-		return va_arg(*args, intmax_t);
+		return va_arg(*args, ou_intmax_t);
 
 	case LENGTH_Z:
-		return va_arg(*args, size_t);
+		return va_arg(*args, ou_size_t);
 
 	case LENGTH_T:
-		return va_arg(*args, ptrdiff_t);
+		return va_arg(*args, ou_ptrdiff_t);
 
 	default:
 		return va_arg(*args, int);
@@ -210,13 +210,13 @@ static unsigned long long get_int_argument_unsigned(va_list *args, unsigned int 
 		return va_arg(*args, unsigned long long);
 
 	case LENGTH_J:
-		return va_arg(*args, intmax_t);
+		return va_arg(*args, ou_uintmax_t);
 
 	case LENGTH_Z:
-		return va_arg(*args, size_t);
+		return va_arg(*args, ou_size_t);
 
 	case LENGTH_T:
-		return va_arg(*args, ptrdiff_t);
+		return va_arg(*args, ou_ptrdiff_t);
 
 	default:
 		return va_arg(*args, unsigned int);
@@ -226,11 +226,11 @@ static unsigned long long get_int_argument_unsigned(va_list *args, unsigned int 
 static int print_pointer(write_cb write_cb, void *cb_data, const void *ptr)
 {
 	int retval = -1;
-	size_t i;
+	ou_size_t i;
 	char buf[sizeof(ptr) * 2];
 
 	for (i = 0; i < sizeof(ptr); i++) {
-		byte_to_hex(buf + (i * 2), (((size_t) ptr) >> ((sizeof(ptr) - i - 1) * 8)) & 0xFF, 0);
+		byte_to_hex(buf + (i * 2), (((ou_size_t) ptr) >> ((sizeof(ptr) - i - 1) * 8)) & 0xFF, 0);
 	}
 
 	if (write_cb(cb_data, buf, sizeof(buf)) < 0) {
@@ -260,7 +260,7 @@ static int is_digit(char digit)
 static int parse_specifier(write_cb write_cb, void *cb_data, int written, const char **format, va_list *args)
 {
 	int retval = -1;
-	size_t total_len = 0;
+	ou_size_t total_len = 0;
 	int stop;
 
 	unsigned int flags = 0;
@@ -270,7 +270,7 @@ static int parse_specifier(write_cb write_cb, void *cb_data, int written, const 
 
 	char chr;
 	const char *str;
-	size_t str_len;
+	ou_size_t str_len;
 	int *written_arg;
 	const void *ptr;
 	int sign;
