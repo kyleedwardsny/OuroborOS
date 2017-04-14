@@ -45,5 +45,4 @@ add_custom_target(itb ALL DEPENDS "${IMAGE_ITB}")
 include("dts.cmake")
 
 add_subdirectory("libou")
-add_subdirectory("libou_fdt")
 add_subdirectory("kernel")

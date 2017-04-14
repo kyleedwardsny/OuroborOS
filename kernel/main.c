@@ -1,6 +1,5 @@
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/common.h>
-#include <ouroboros/fdt.h>
 #include <ouroboros/hw/uart/16550.h>
 #include <ouroboros/kernel/eat_self.h>
 #include <ouroboros/stdio.h>
@@ -135,16 +134,16 @@ void k_main(void);
 
 void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 {
-	struct ou_fdt_header *header;
+	/*struct ou_fdt_header *header;*/
 
 	switch (arg0) {
 	case -2:
-		header = (struct ou_fdt_header *) arg1;
+		/*header = (struct ou_fdt_header *) arg1;
 		if (ou_fdt_check_header(header) < 0) {
 			k_printf("Invalid FDT header\n");
 		} else {
 			k_printf("Valid FDT header\n");
-		}
+		}*/
 		break;
 
 	default:
