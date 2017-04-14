@@ -9,20 +9,43 @@
 
 #include <stdint.h>
 
-static struct uart_16550 *uart = (struct uart_16550 *) 0x940003F8;
-
-static void k_putchar(char c)
+static int k_putchar(struct uart_16550 *uart, int c)
 {
 	while (!(uart->lsr & UART_16550_LSR_THRE));
 	uart->port0.rbr = c;
+	return c;
 }
 
-static void k_puts(const char *str)
+static ou_ssize_t k_write(void *cb_data, const void *data, size_t len)
 {
-	while (*str) {
-		k_putchar(*str++);
+	struct uart_16550 *uart = cb_data;
+	size_t i;
+	const uint8_t *bytes = data;
+
+	for (i = 0; i < len; i++) {
+		k_putchar(uart, bytes[i]);
 	}
-	k_putchar('\n');
+
+	return len;
+}
+
+static int vk_printf(const char *format, va_list args)
+{
+	struct uart_16550 *uart = (struct uart_16550 *) 0x940003F8;
+
+	return _ou_vfprintf(k_write, uart, format, args);
+}
+
+static int k_printf(const char *format, ...)
+{
+	int retval;
+	va_list args;
+
+	va_start(args, format);
+	retval = vk_printf(format, args);
+	va_end(args);
+
+	return retval;
 }
 
 static int num_tlb_pages = -1;
@@ -119,14 +142,14 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 	case -2:
 		header = (struct ou_fdt_header *) arg1;
 		if (ou_fdt_check_header(header) < 0) {
-			k_puts("Invalid FDT header");
+			k_printf("Invalid FDT header\n");
 		} else {
-			k_puts("Valid FDT header");
+			k_printf("Valid FDT header\n");
 		}
 		break;
 
 	default:
-		k_puts("Must pass an FDT");
+		k_printf("Must pass an FDT\n");
 	}
 
 	k_main();
@@ -134,17 +157,14 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 
 void k_main(void)
 {
-	/* Get the number of TLB entries available */
 	uint32_t config1;
-	uint32_t status;
-	uint32_t myval = 17;
 	unsigned int mmu_size;
-	int result;
 
 	char buf[] = "abcdefghijklmnopqrstuvwxyz";
 
 	MFC0(config1, MIPS_CP0_CONFIG1);
 
+	/* Get the number of TLB entries available */
 	mmu_size = (config1 & MIPS_CP0_CONFIG1_MMUSIZE) >> 25;
 	if (mmu_size > 0) {
 		num_tlb_pages = mmu_size + 1;
@@ -152,6 +172,5 @@ void k_main(void)
 		k_eat_self("Must have at least 1 TLB page");
 	}
 
-	result = ou_sprintf(buf, "%-#7o", 0775);
-	k_puts(buf);
+	k_printf("%p\n", 0775);
 }
