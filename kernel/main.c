@@ -147,12 +147,13 @@ static void traverse_fdt(const void *fdt, int parent, unsigned int level)
 {
 	int node;
 	int property;
+	int len;
 	const char *property_name;
 
 	fdt_for_each_property_offset(property, fdt, parent) {
-		fdt_getprop_by_offset(fdt, property, &property_name, NULL);
+		fdt_getprop_by_offset(fdt, property, &property_name, &len);
 		print_spaces((level - 1) * 2);
-		k_printf("p %s\n", property_name);
+		k_printf("p %s %i\n", property_name, len);
 	}
 
 	fdt_for_each_subnode(node, fdt, parent) {
