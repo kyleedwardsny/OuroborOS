@@ -137,6 +137,7 @@ void k_main(void);
 void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 {
 	void *fdt;
+	int node;
 
 	switch (arg0) {
 	case -2:
@@ -145,6 +146,9 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 			k_printf("Invalid FDT header\n");
 		} else {
 			k_printf("Valid FDT header\n");
+			fdt_for_each_subnode(node, fdt, 0) {
+				k_printf("%i %s\n", node, fdt_get_name(fdt, node, NULL));
+			}
 		}
 		break;
 
