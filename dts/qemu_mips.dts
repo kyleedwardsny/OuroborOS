@@ -5,13 +5,24 @@
 	#size-cells = <1>;
 
 	chosen {
-	};
-
-	aliases {
+		stdout-path = &uart0;
 	};
 
 	memory {
 		device_type = "memory";
 		reg = <0 0x8000000>;
+	};
+
+	isa@0 {
+		compatible = "isa";
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges = <0x0 0x14000000 0x10000>;
+
+		uart0: serial@3f8 {
+			compatible = "ns16550";
+			reg = <0x3f8 0x8>;
+			clock-frequency = <1843200>;
+		};
 	};
 };

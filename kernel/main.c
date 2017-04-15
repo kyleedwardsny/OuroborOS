@@ -157,8 +157,8 @@ static void traverse_fdt(const void *fdt, int parent, unsigned int level)
 	}
 
 	fdt_for_each_subnode(node, fdt, parent) {
-		k_printf("n %s\n", fdt_get_name(fdt, node, NULL));
 		print_spaces((level - 1) * 2);
+		k_printf("n %s\n", fdt_get_name(fdt, node, NULL));
 		traverse_fdt(fdt, node, level + 1);
 	}
 }
