@@ -134,10 +134,37 @@ static int set_tlb_entry(int index, const struct mips_tlb_entry *entry)
 
 void k_main(void);
 
+static void print_spaces(unsigned int num_spaces)
+{
+	unsigned int i;
+
+	for (i = 0; i < num_spaces; i++) {
+		k_printf(" ");
+	}
+}
+
+static void traverse_fdt(const void *fdt, int parent, unsigned int level)
+{
+	int node;
+	int property;
+	const char *property_name;
+
+	fdt_for_each_property_offset(property, fdt, parent) {
+		fdt_getprop_by_offset(fdt, property, &property_name, NULL);
+		print_spaces((level - 1) * 2);
+		k_printf("p %s\n", property_name);
+	}
+
+	fdt_for_each_subnode(node, fdt, parent) {
+		k_printf("n %s\n", fdt_get_name(fdt, node, NULL));
+		print_spaces((level - 1) * 2);
+		traverse_fdt(fdt, node, level + 1);
+	}
+}
+
 void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 {
 	void *fdt;
-	int node;
 
 	switch (arg0) {
 	case -2:
@@ -146,9 +173,7 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 			k_printf("Invalid FDT header\n");
 		} else {
 			k_printf("Valid FDT header\n");
-			fdt_for_each_subnode(node, fdt, 0) {
-				k_printf("%i %s\n", node, fdt_get_name(fdt, node, NULL));
-			}
+			traverse_fdt(fdt, 0, 1);
 		}
 		break;
 
