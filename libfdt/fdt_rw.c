@@ -105,7 +105,7 @@ static int _fdt_splice(void *fdt, void *splicepoint, int oldlen, int newlen)
 		return -FDT_ERR_BADOFFSET;
 	if ((end - oldlen + newlen) > ((char *)fdt + fdt_totalsize(fdt)))
 		return -FDT_ERR_NOSPACE;
-	memmove(p + newlen, p + oldlen, end - p - oldlen);
+	ou_memmove(p + newlen, p + oldlen, end - p - oldlen);
 	return 0;
 }
 
@@ -154,7 +154,7 @@ static int _fdt_find_add_string(void *fdt, const char *s)
 	char *strtab = (char *)fdt + fdt_off_dt_strings(fdt);
 	const char *p;
 	char *new;
-	int len = strlen(s) + 1;
+	int len = ou_strlen(s) + 1;
 	int err;
 
 	p = _fdt_find_string(strtab, fdt_size_dt_strings(fdt), s);
@@ -167,11 +167,11 @@ static int _fdt_find_add_string(void *fdt, const char *s)
 	if (err)
 		return err;
 
-	memcpy(new, s, len);
+	ou_memcpy(new, s, len);
 	return (new - strtab);
 }
 
-int fdt_add_mem_rsv(void *fdt, uint64_t address, uint64_t size)
+int fdt_add_mem_rsv(void *fdt, ou_uint64_t address, ou_uint64_t size)
 {
 	struct fdt_reserve_entry *re;
 	int err;
@@ -258,14 +258,14 @@ int fdt_set_name(void *fdt, int nodeoffset, const char *name)
 	if (!namep)
 		return oldlen;
 
-	newlen = strlen(name);
+	newlen = ou_strlen(name);
 
 	err = _fdt_splice_struct(fdt, namep, FDT_TAGALIGN(oldlen+1),
 				 FDT_TAGALIGN(newlen+1));
 	if (err)
 		return err;
 
-	memcpy(namep, name, newlen+1);
+	ou_memcpy(namep, name, newlen+1);
 	return 0;
 }
 
@@ -284,7 +284,7 @@ int fdt_setprop(void *fdt, int nodeoffset, const char *name,
 		return err;
 
 	if (len)
-		memcpy(prop->data, val, len);
+		ou_memcpy(prop->data, val, len);
 	return 0;
 }
 
@@ -305,12 +305,12 @@ int fdt_appendprop(void *fdt, int nodeoffset, const char *name,
 		if (err)
 			return err;
 		prop->len = cpu_to_fdt32(newlen);
-		memcpy(prop->data + oldlen, val, len);
+		ou_memcpy(prop->data + oldlen, val, len);
 	} else {
 		err = _fdt_add_property(fdt, nodeoffset, name, len, &prop);
 		if (err)
 			return err;
-		memcpy(prop->data, val, len);
+		ou_memcpy(prop->data, val, len);
 	}
 	return 0;
 }
@@ -337,7 +337,7 @@ int fdt_add_subnode_namelen(void *fdt, int parentoffset,
 	int offset, nextoffset;
 	int nodelen;
 	int err;
-	uint32_t tag;
+	ou_uint32_t tag;
 	fdt32_t *endtag;
 
 	FDT_RW_CHECK_HEADER(fdt);
@@ -363,8 +363,8 @@ int fdt_add_subnode_namelen(void *fdt, int parentoffset,
 		return err;
 
 	nh->tag = cpu_to_fdt32(FDT_BEGIN_NODE);
-	memset(nh->name, 0, FDT_TAGALIGN(namelen+1));
-	memcpy(nh->name, name, namelen);
+	ou_memset(nh->name, 0, FDT_TAGALIGN(namelen+1));
+	ou_memcpy(nh->name, name, namelen);
 	endtag = (fdt32_t *)((char *)nh + nodelen - FDT_TAGSIZE);
 	*endtag = cpu_to_fdt32(FDT_END_NODE);
 
@@ -373,7 +373,7 @@ int fdt_add_subnode_namelen(void *fdt, int parentoffset,
 
 int fdt_add_subnode(void *fdt, int parentoffset, const char *name)
 {
-	return fdt_add_subnode_namelen(fdt, parentoffset, name, strlen(name));
+	return fdt_add_subnode_namelen(fdt, parentoffset, name, ou_strlen(name));
 }
 
 int fdt_del_node(void *fdt, int nodeoffset)
@@ -399,14 +399,14 @@ static void _fdt_packblocks(const char *old, char *new,
 	struct_off = mem_rsv_off + mem_rsv_size;
 	strings_off = struct_off + struct_size;
 
-	memmove(new + mem_rsv_off, old + fdt_off_mem_rsvmap(old), mem_rsv_size);
+	ou_memmove(new + mem_rsv_off, old + fdt_off_mem_rsvmap(old), mem_rsv_size);
 	fdt_set_off_mem_rsvmap(new, mem_rsv_off);
 
-	memmove(new + struct_off, old + fdt_off_dt_struct(old), struct_size);
+	ou_memmove(new + struct_off, old + fdt_off_dt_struct(old), struct_size);
 	fdt_set_off_dt_struct(new, struct_off);
 	fdt_set_size_dt_struct(new, struct_size);
 
-	memmove(new + strings_off, old + fdt_off_dt_strings(old),
+	ou_memmove(new + strings_off, old + fdt_off_dt_strings(old),
 		fdt_size_dt_strings(old));
 	fdt_set_off_dt_strings(new, strings_off);
 	fdt_set_size_dt_strings(new, fdt_size_dt_strings(old));
@@ -465,7 +465,7 @@ int fdt_open_into(const void *fdt, void *buf, int bufsize)
 	}
 
 	_fdt_packblocks(fdt, tmp, mem_rsv_size, struct_size);
-	memmove(buf, tmp, newsize);
+	ou_memmove(buf, tmp, newsize);
 
 	fdt_set_magic(buf, FDT_MAGIC);
 	fdt_set_totalsize(buf, bufsize);

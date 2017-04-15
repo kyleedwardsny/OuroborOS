@@ -91,10 +91,10 @@ const void *fdt_offset_ptr(const void *fdt, int offset, unsigned int len)
 	return _fdt_offset_ptr(fdt, offset);
 }
 
-uint32_t fdt_next_tag(const void *fdt, int startoffset, int *nextoffset)
+ou_uint32_t fdt_next_tag(const void *fdt, int startoffset, int *nextoffset)
 {
 	const fdt32_t *tagp, *lenp;
-	uint32_t tag;
+	ou_uint32_t tag;
 	int offset = startoffset;
 	const char *p;
 
@@ -162,7 +162,7 @@ int _fdt_check_prop_offset(const void *fdt, int offset)
 int fdt_next_node(const void *fdt, int offset, int *depth)
 {
 	int nextoffset = 0;
-	uint32_t tag;
+	ou_uint32_t tag;
 
 	if (offset >= 0)
 		if ((nextoffset = _fdt_check_node_offset(fdt, offset)) < 0)
@@ -229,12 +229,12 @@ int fdt_next_subnode(const void *fdt, int offset)
 
 const char *_fdt_find_string(const char *strtab, int tabsize, const char *s)
 {
-	int len = strlen(s) + 1;
+	int len = ou_strlen(s) + 1;
 	const char *last = strtab + tabsize - len;
 	const char *p;
 
 	for (p = strtab; p <= last; p++)
-		if (memcmp(p, s, len) == 0)
+		if (ou_memcmp(p, s, len) == 0)
 			return p;
 	return NULL;
 }
@@ -246,6 +246,6 @@ int fdt_move(const void *fdt, void *buf, int bufsize)
 	if (fdt_totalsize(fdt) > bufsize)
 		return -FDT_ERR_NOSPACE;
 
-	memmove(buf, fdt, fdt_totalsize(fdt));
+	ou_memmove(buf, fdt, fdt_totalsize(fdt));
 	return 0;
 }

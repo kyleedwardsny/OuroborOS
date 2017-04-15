@@ -19,7 +19,7 @@
  *      0, if the phandle was not found
  *	-1, if the phandle was malformed
  */
-static uint32_t overlay_get_target_phandle(const void *fdto, int fragment)
+static ou_uint32_t overlay_get_target_phandle(const void *fdto, int fragment)
 {
 	const fdt32_t *val;
 	int len;
@@ -28,8 +28,8 @@ static uint32_t overlay_get_target_phandle(const void *fdto, int fragment)
 	if (!val)
 		return 0;
 
-	if ((len != sizeof(*val)) || (fdt32_to_cpu(*val) == (uint32_t)-1))
-		return (uint32_t)-1;
+	if ((len != sizeof(*val)) || (fdt32_to_cpu(*val) == (ou_uint32_t)-1))
+		return (ou_uint32_t)-1;
 
 	return fdt32_to_cpu(*val);
 }
@@ -51,13 +51,13 @@ static uint32_t overlay_get_target_phandle(const void *fdto, int fragment)
 static int overlay_get_target(const void *fdt, const void *fdto,
 			      int fragment)
 {
-	uint32_t phandle;
+	ou_uint32_t phandle;
 	const char *path;
 	int path_len;
 
 	/* Try first to do a phandle based lookup */
 	phandle = overlay_get_target_phandle(fdto, fragment);
-	if (phandle == (uint32_t)-1)
+	if (phandle == (ou_uint32_t)-1)
 		return -FDT_ERR_BADPHANDLE;
 
 	if (phandle)
@@ -97,10 +97,10 @@ static int overlay_get_target(const void *fdt, const void *fdto,
  *      Negative error code on error
  */
 static int overlay_phandle_add_offset(void *fdt, int node,
-				      const char *name, uint32_t delta)
+				      const char *name, ou_uint32_t delta)
 {
 	const fdt32_t *val;
-	uint32_t adj_val;
+	ou_uint32_t adj_val;
 	int len;
 
 	val = fdt_getprop(fdt, node, name, &len);
@@ -115,7 +115,7 @@ static int overlay_phandle_add_offset(void *fdt, int node,
 		return -FDT_ERR_NOPHANDLES;
 
 	adj_val += delta;
-	if (adj_val == (uint32_t)-1)
+	if (adj_val == (ou_uint32_t)-1)
 		return -FDT_ERR_NOPHANDLES;
 
 	return fdt_setprop_inplace_u32(fdt, node, name, adj_val);
@@ -137,7 +137,7 @@ static int overlay_phandle_add_offset(void *fdt, int node,
  *      Negative error code on failure
  */
 static int overlay_adjust_node_phandles(void *fdto, int node,
-					uint32_t delta)
+					ou_uint32_t delta)
 {
 	int child;
 	int ret;
@@ -173,7 +173,7 @@ static int overlay_adjust_node_phandles(void *fdto, int node,
  *      0 on success
  *      Negative error code on failure
  */
-static int overlay_adjust_local_phandles(void *fdto, uint32_t delta)
+static int overlay_adjust_local_phandles(void *fdto, ou_uint32_t delta)
 {
 	/*
 	 * Start adjusting the phandles from the overlay root
@@ -203,7 +203,7 @@ static int overlay_adjust_local_phandles(void *fdto, uint32_t delta)
 static int overlay_update_local_node_references(void *fdto,
 						int tree_node,
 						int fixup_node,
-						uint32_t delta)
+						ou_uint32_t delta)
 {
 	int fixup_prop;
 	int fixup_child;
@@ -222,7 +222,7 @@ static int overlay_update_local_node_references(void *fdto,
 		if (!fixup_val)
 			return fixup_len;
 
-		if (fixup_len % sizeof(uint32_t))
+		if (fixup_len % sizeof(ou_uint32_t))
 			return -FDT_ERR_BADOVERLAY;
 
 		tree_val = fdt_getprop(fdto, tree_node, name, &tree_len);
@@ -233,9 +233,9 @@ static int overlay_update_local_node_references(void *fdto,
 			return tree_len;
 		}
 
-		for (i = 0; i < (fixup_len / sizeof(uint32_t)); i++) {
+		for (i = 0; i < (fixup_len / sizeof(ou_uint32_t)); i++) {
 			fdt32_t adj_val;
-			uint32_t poffset;
+			ou_uint32_t poffset;
 
 			poffset = fdt32_to_cpu(fixup_val[i]);
 
@@ -245,14 +245,14 @@ static int overlay_update_local_node_references(void *fdto,
 			 * Use a memcpy for the architectures that do
 			 * not support unaligned accesses.
 			 */
-			memcpy(&adj_val, tree_val + poffset, sizeof(adj_val));
+			ou_memcpy(&adj_val, tree_val + poffset, sizeof(adj_val));
 
 			adj_val = cpu_to_fdt32(fdt32_to_cpu(adj_val) + delta);
 
 			ret = fdt_setprop_inplace_namelen_partial(fdto,
 								  tree_node,
 								  name,
-								  strlen(name),
+								  ou_strlen(name),
 								  poffset,
 								  &adj_val,
 								  sizeof(adj_val));
@@ -304,7 +304,7 @@ static int overlay_update_local_node_references(void *fdto,
  *      0 on success
  *      Negative error code on failure
  */
-static int overlay_update_local_references(void *fdto, uint32_t delta)
+static int overlay_update_local_references(void *fdto, ou_uint32_t delta)
 {
 	int fixups;
 
@@ -349,12 +349,12 @@ static int overlay_update_local_references(void *fdto, uint32_t delta)
  */
 static int overlay_fixup_one_phandle(void *fdt, void *fdto,
 				     int symbols_off,
-				     const char *path, uint32_t path_len,
-				     const char *name, uint32_t name_len,
+				     const char *path, ou_uint32_t path_len,
+				     const char *name, ou_uint32_t name_len,
 				     int poffset, const char *label)
 {
 	const char *symbol_path;
-	uint32_t phandle;
+	ou_uint32_t phandle;
 	fdt32_t phandle_prop;
 	int symbol_off, fixup_off;
 	int prop_len;
@@ -426,12 +426,12 @@ static int overlay_fixup_phandle(void *fdt, void *fdto, int symbols_off,
 	do {
 		const char *path, *name, *fixup_end;
 		const char *fixup_str = value;
-		uint32_t path_len, name_len;
-		uint32_t fixup_len;
+		ou_uint32_t path_len, name_len;
+		ou_uint32_t fixup_len;
 		char *sep, *endptr;
 		int poffset, ret;
 
-		fixup_end = memchr(value, '\0', len);
+		fixup_end = ou_memchr(value, '\0', len);
 		if (!fixup_end)
 			return -FDT_ERR_BADOVERLAY;
 		fixup_len = fixup_end - fixup_str;
@@ -440,7 +440,7 @@ static int overlay_fixup_phandle(void *fdt, void *fdto, int symbols_off,
 		value += fixup_len + 1;
 
 		path = fixup_str;
-		sep = memchr(fixup_str, ':', fixup_len);
+		sep = ou_memchr(fixup_str, ':', fixup_len);
 		if (!sep || *sep != ':')
 			return -FDT_ERR_BADOVERLAY;
 
@@ -450,7 +450,7 @@ static int overlay_fixup_phandle(void *fdt, void *fdto, int symbols_off,
 
 		fixup_len -= path_len + 1;
 		name = sep + 1;
-		sep = memchr(name, ':', fixup_len);
+		sep = ou_memchr(name, ':', fixup_len);
 		if (!sep || *sep != ':')
 			return -FDT_ERR_BADOVERLAY;
 
@@ -632,7 +632,7 @@ static int overlay_merge(void *fdt, void *fdto)
 
 int fdt_overlay_apply(void *fdt, void *fdto)
 {
-	uint32_t delta = fdt_get_max_phandle(fdt);
+	ou_uint32_t delta = fdt_get_max_phandle(fdt);
 	int ret;
 
 	FDT_CHECK_HEADER(fdt);

@@ -225,7 +225,7 @@ int fdt_next_subnode(const void *fdt, int offset);
 #define fdt_size_dt_struct(fdt)		(fdt_get_header(fdt, size_dt_struct))
 
 #define __fdt_set_hdr(name) \
-	static inline void fdt_set_##name(void *fdt, uint32_t val) \
+	static inline void fdt_set_##name(void *fdt, ou_uint32_t val) \
 	{ \
 		struct fdt_header *fdth = (struct fdt_header *)fdt; \
 		fdth->name = cpu_to_fdt32(val); \
@@ -340,7 +340,7 @@ int fdt_num_mem_rsv(const void *fdt);
  *     -FDT_ERR_BADVERSION,
  *     -FDT_ERR_BADSTATE, standard meanings
  */
-int fdt_get_mem_rsv(const void *fdt, int n, uint64_t *address, uint64_t *size);
+int fdt_get_mem_rsv(const void *fdt, int n, ou_uint64_t *address, ou_uint64_t *size);
 
 /**
  * fdt_subnode_offset_namelen - find a subnode based on substring
@@ -889,7 +889,7 @@ int fdt_node_offset_by_prop_value(const void *fdt, int startoffset,
  *	-FDT_ERR_BADSTATE,
  *	-FDT_ERR_BADSTRUCTURE, standard meanings
  */
-int fdt_node_offset_by_phandle(const void *fdt, uint32_t phandle);
+int fdt_node_offset_by_phandle(const void *fdt, ou_uint32_t phandle);
 
 /**
  * fdt_node_check_compatible: check a node's compatible property
@@ -1108,7 +1108,7 @@ int fdt_size_cells(const void *fdt, int nodeoffset);
  */
 int fdt_setprop_inplace_namelen_partial(void *fdt, int nodeoffset,
 					const char *name, int namelen,
-					uint32_t idx, const void *val,
+					ou_uint32_t idx, const void *val,
 					int len);
 
 /**
@@ -1171,7 +1171,7 @@ int fdt_setprop_inplace(void *fdt, int nodeoffset, const char *name,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
 static inline int fdt_setprop_inplace_u32(void *fdt, int nodeoffset,
-					  const char *name, uint32_t val)
+					  const char *name, ou_uint32_t val)
 {
 	fdt32_t tmp = cpu_to_fdt32(val);
 	return fdt_setprop_inplace(fdt, nodeoffset, name, &tmp, sizeof(tmp));
@@ -1206,7 +1206,7 @@ static inline int fdt_setprop_inplace_u32(void *fdt, int nodeoffset,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
 static inline int fdt_setprop_inplace_u64(void *fdt, int nodeoffset,
-					  const char *name, uint64_t val)
+					  const char *name, ou_uint64_t val)
 {
 	fdt64_t tmp = cpu_to_fdt64(val);
 	return fdt_setprop_inplace(fdt, nodeoffset, name, &tmp, sizeof(tmp));
@@ -1218,7 +1218,7 @@ static inline int fdt_setprop_inplace_u64(void *fdt, int nodeoffset,
  * This is an alternative name for fdt_setprop_inplace_u32()
  */
 static inline int fdt_setprop_inplace_cell(void *fdt, int nodeoffset,
-					   const char *name, uint32_t val)
+					   const char *name, ou_uint32_t val)
 {
 	return fdt_setprop_inplace_u32(fdt, nodeoffset, name, val);
 }
@@ -1279,21 +1279,21 @@ int fdt_nop_node(void *fdt, int nodeoffset);
 
 int fdt_create(void *buf, int bufsize);
 int fdt_resize(void *fdt, void *buf, int bufsize);
-int fdt_add_reservemap_entry(void *fdt, uint64_t addr, uint64_t size);
+int fdt_add_reservemap_entry(void *fdt, ou_uint64_t addr, ou_uint64_t size);
 int fdt_finish_reservemap(void *fdt);
 int fdt_begin_node(void *fdt, const char *name);
 int fdt_property(void *fdt, const char *name, const void *val, int len);
-static inline int fdt_property_u32(void *fdt, const char *name, uint32_t val)
+static inline int fdt_property_u32(void *fdt, const char *name, ou_uint32_t val)
 {
 	fdt32_t tmp = cpu_to_fdt32(val);
 	return fdt_property(fdt, name, &tmp, sizeof(tmp));
 }
-static inline int fdt_property_u64(void *fdt, const char *name, uint64_t val)
+static inline int fdt_property_u64(void *fdt, const char *name, ou_uint64_t val)
 {
 	fdt64_t tmp = cpu_to_fdt64(val);
 	return fdt_property(fdt, name, &tmp, sizeof(tmp));
 }
-static inline int fdt_property_cell(void *fdt, const char *name, uint32_t val)
+static inline int fdt_property_cell(void *fdt, const char *name, ou_uint32_t val)
 {
 	return fdt_property_u32(fdt, name, val);
 }
@@ -1332,7 +1332,7 @@ int fdt_pack(void *fdt);
  *	-FDT_ERR_BADLAYOUT,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
-int fdt_add_mem_rsv(void *fdt, uint64_t address, uint64_t size);
+int fdt_add_mem_rsv(void *fdt, ou_uint64_t address, ou_uint64_t size);
 
 /**
  * fdt_del_mem_rsv - remove a memory reserve map entry
@@ -1444,7 +1444,7 @@ int fdt_setprop(void *fdt, int nodeoffset, const char *name,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
 static inline int fdt_setprop_u32(void *fdt, int nodeoffset, const char *name,
-				  uint32_t val)
+				  ou_uint32_t val)
 {
 	fdt32_t tmp = cpu_to_fdt32(val);
 	return fdt_setprop(fdt, nodeoffset, name, &tmp, sizeof(tmp));
@@ -1479,7 +1479,7 @@ static inline int fdt_setprop_u32(void *fdt, int nodeoffset, const char *name,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
 static inline int fdt_setprop_u64(void *fdt, int nodeoffset, const char *name,
-				  uint64_t val)
+				  ou_uint64_t val)
 {
 	fdt64_t tmp = cpu_to_fdt64(val);
 	return fdt_setprop(fdt, nodeoffset, name, &tmp, sizeof(tmp));
@@ -1491,7 +1491,7 @@ static inline int fdt_setprop_u64(void *fdt, int nodeoffset, const char *name,
  * This is an alternative name for fdt_setprop_u32()
  */
 static inline int fdt_setprop_cell(void *fdt, int nodeoffset, const char *name,
-				   uint32_t val)
+				   ou_uint32_t val)
 {
 	return fdt_setprop_u32(fdt, nodeoffset, name, val);
 }
@@ -1616,7 +1616,7 @@ int fdt_appendprop(void *fdt, int nodeoffset, const char *name,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
 static inline int fdt_appendprop_u32(void *fdt, int nodeoffset,
-				     const char *name, uint32_t val)
+				     const char *name, ou_uint32_t val)
 {
 	fdt32_t tmp = cpu_to_fdt32(val);
 	return fdt_appendprop(fdt, nodeoffset, name, &tmp, sizeof(tmp));
@@ -1651,7 +1651,7 @@ static inline int fdt_appendprop_u32(void *fdt, int nodeoffset,
  *	-FDT_ERR_TRUNCATED, standard meanings
  */
 static inline int fdt_appendprop_u64(void *fdt, int nodeoffset,
-				     const char *name, uint64_t val)
+				     const char *name, ou_uint64_t val)
 {
 	fdt64_t tmp = cpu_to_fdt64(val);
 	return fdt_appendprop(fdt, nodeoffset, name, &tmp, sizeof(tmp));
@@ -1663,7 +1663,7 @@ static inline int fdt_appendprop_u64(void *fdt, int nodeoffset,
  * This is an alternative name for fdt_appendprop_u32()
  */
 static inline int fdt_appendprop_cell(void *fdt, int nodeoffset,
-				      const char *name, uint32_t val)
+				      const char *name, ou_uint32_t val)
 {
 	return fdt_appendprop_u32(fdt, nodeoffset, name, val);
 }

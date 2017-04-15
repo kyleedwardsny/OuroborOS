@@ -7,6 +7,8 @@
 #include <ouroboros/stdlib.h>
 #include <ouroboros/string.h>
 
+#include <libfdt.h>
+
 static int k_putchar(struct uart_16550 *uart, int c)
 {
 	while (!(uart->lsr & UART_16550_LSR_THRE));
@@ -134,16 +136,16 @@ void k_main(void);
 
 void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 {
-	/*struct ou_fdt_header *header;*/
+	void *fdt;
 
 	switch (arg0) {
 	case -2:
-		/*header = (struct ou_fdt_header *) arg1;
-		if (ou_fdt_check_header(header) < 0) {
+		fdt = (void *) arg1;
+		if (fdt_check_header(fdt) < 0) {
 			k_printf("Invalid FDT header\n");
 		} else {
 			k_printf("Valid FDT header\n");
-		}*/
+		}
 		break;
 
 	default:
@@ -158,8 +160,6 @@ void k_main(void)
 	ou_uint32_t config1;
 	unsigned int mmu_size;
 
-	char buf[] = "abcdefghijklmnopqrstuvwxyz";
-
 	MFC0(config1, MIPS_CP0_CONFIG1);
 
 	/* Get the number of TLB entries available */
@@ -169,6 +169,4 @@ void k_main(void)
 	} else {
 		k_eat_self("Must have at least 1 TLB page");
 	}
-
-	k_printf("%p\n", 0775);
 }

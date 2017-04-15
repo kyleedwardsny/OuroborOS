@@ -70,7 +70,7 @@ static int _fdt_sw_check_header(void *fdt)
 			return err; \
 	}
 
-static void *_fdt_grab_space(void *fdt, size_t len)
+static void *_fdt_grab_space(void *fdt, ou_size_t len)
 {
 	int offset = fdt_size_dt_struct(fdt);
 	int spaceleft;
@@ -92,7 +92,7 @@ int fdt_create(void *buf, int bufsize)
 	if (bufsize < sizeof(struct fdt_header))
 		return -FDT_ERR_NOSPACE;
 
-	memset(buf, 0, bufsize);
+	ou_memset(buf, 0, bufsize);
 
 	fdt_set_magic(fdt, FDT_SW_MAGIC);
 	fdt_set_version(fdt, FDT_LAST_SUPPORTED_VERSION);
@@ -109,7 +109,7 @@ int fdt_create(void *buf, int bufsize)
 
 int fdt_resize(void *fdt, void *buf, int bufsize)
 {
-	size_t headsize, tailsize;
+	ou_size_t headsize, tailsize;
 	char *oldtail, *newtail;
 
 	FDT_SW_CHECK_HEADER(fdt);
@@ -126,11 +126,11 @@ int fdt_resize(void *fdt, void *buf, int bufsize)
 	/* Two cases to avoid clobbering data if the old and new
 	 * buffers partially overlap */
 	if (buf <= fdt) {
-		memmove(buf, fdt, headsize);
-		memmove(newtail, oldtail, tailsize);
+		ou_memmove(buf, fdt, headsize);
+		ou_memmove(newtail, oldtail, tailsize);
 	} else {
-		memmove(newtail, oldtail, tailsize);
-		memmove(buf, fdt, headsize);
+		ou_memmove(newtail, oldtail, tailsize);
+		ou_memmove(buf, fdt, headsize);
 	}
 
 	fdt_set_off_dt_strings(buf, bufsize);
@@ -139,7 +139,7 @@ int fdt_resize(void *fdt, void *buf, int bufsize)
 	return 0;
 }
 
-int fdt_add_reservemap_entry(void *fdt, uint64_t addr, uint64_t size)
+int fdt_add_reservemap_entry(void *fdt, ou_uint64_t addr, ou_uint64_t size)
 {
 	struct fdt_reserve_entry *re;
 	int offset;
@@ -170,7 +170,7 @@ int fdt_finish_reservemap(void *fdt)
 int fdt_begin_node(void *fdt, const char *name)
 {
 	struct fdt_node_header *nh;
-	int namelen = strlen(name) + 1;
+	int namelen = ou_strlen(name) + 1;
 
 	FDT_SW_CHECK_HEADER(fdt);
 
@@ -179,7 +179,7 @@ int fdt_begin_node(void *fdt, const char *name)
 		return -FDT_ERR_NOSPACE;
 
 	nh->tag = cpu_to_fdt32(FDT_BEGIN_NODE);
-	memcpy(nh->name, name, namelen);
+	ou_memcpy(nh->name, name, namelen);
 	return 0;
 }
 
@@ -202,7 +202,7 @@ static int _fdt_find_add_string(void *fdt, const char *s)
 	char *strtab = (char *)fdt + fdt_totalsize(fdt);
 	const char *p;
 	int strtabsize = fdt_size_dt_strings(fdt);
-	int len = strlen(s) + 1;
+	int len = ou_strlen(s) + 1;
 	int struct_top, offset;
 
 	p = _fdt_find_string(strtab - strtabsize, strtabsize, s);
@@ -215,7 +215,7 @@ static int _fdt_find_add_string(void *fdt, const char *s)
 	if (fdt_totalsize(fdt) + offset < struct_top)
 		return 0; /* no more room :( */
 
-	memcpy(strtab + offset, s, len);
+	ou_memcpy(strtab + offset, s, len);
 	fdt_set_size_dt_strings(fdt, strtabsize + len);
 	return offset;
 }
@@ -238,7 +238,7 @@ int fdt_property(void *fdt, const char *name, const void *val, int len)
 	prop->tag = cpu_to_fdt32(FDT_PROP);
 	prop->nameoff = cpu_to_fdt32(nameoff);
 	prop->len = cpu_to_fdt32(len);
-	memcpy(prop->data, val, len);
+	ou_memcpy(prop->data, val, len);
 	return 0;
 }
 
@@ -247,7 +247,7 @@ int fdt_finish(void *fdt)
 	char *p = (char *)fdt;
 	fdt32_t *end;
 	int oldstroffset, newstroffset;
-	uint32_t tag;
+	ou_uint32_t tag;
 	int offset, nextoffset;
 
 	FDT_SW_CHECK_HEADER(fdt);
@@ -261,7 +261,7 @@ int fdt_finish(void *fdt)
 	/* Relocate the string table */
 	oldstroffset = fdt_totalsize(fdt) - fdt_size_dt_strings(fdt);
 	newstroffset = fdt_off_dt_struct(fdt) + fdt_size_dt_struct(fdt);
-	memmove(p + newstroffset, p + oldstroffset, fdt_size_dt_strings(fdt));
+	ou_memmove(p + newstroffset, p + oldstroffset, fdt_size_dt_strings(fdt));
 	fdt_set_off_dt_strings(fdt, newstroffset);
 
 	/* Walk the structure, correcting string offsets */
