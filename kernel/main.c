@@ -1,7 +1,11 @@
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/common.h>
 #include <ouroboros/hw/uart/16550.h>
+
+#include <ouroboros/kernel/config.h>
 #include <ouroboros/kernel/eat_self.h>
+#include <ouroboros/kernel/mmu.h>
+
 #include <ouroboros/stdio.h>
 #include <ouroboros/stdint.h>
 #include <ouroboros/stdlib.h>
@@ -187,16 +191,6 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 
 void k_main(void)
 {
-	ou_uint32_t config1;
-	unsigned int mmu_size;
-
-	MFC0(config1, MIPS_CP0_CONFIG1);
-
-	/* Get the number of TLB entries available */
-	mmu_size = (config1 & MIPS_CP0_CONFIG1_MMUSIZE) >> 25;
-	if (mmu_size > 0) {
-		num_tlb_pages = mmu_size + 1;
-	} else {
-		k_eat_self("Must have at least 1 TLB page");
-	}
+	k_read_cpu_config();
+	k_clear_tlb();
 }

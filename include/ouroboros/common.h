@@ -60,4 +60,6 @@
 
 #define ALIGN(val, align)	((val) + (align) - 1 - (((val) + (align) - 1) % (align)))
 
+#define ARRAY_SIZE(arr)		(sizeof(arr) / sizeof(*(arr)))
+
 #endif /* OUROBOROS_COMMON_H */

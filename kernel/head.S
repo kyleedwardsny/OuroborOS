@@ -1,4 +1,3 @@
-#include <ouroboros/hw/uart/16550.h>
 #include <ouroboros/arch/mips/cp0.h>
 
 	.section .text.start
@@ -6,6 +5,12 @@
 	.global _start
 	.type _start, function
 _start:
+	/* Disable interrupts, set up status register */
+	di
+
+	li $t0, MIPS_CP0_STATUS_BEV | MIPS_CP0_STATUS_KSU_U | MIPS_CP0_STATUS_EXL
+	mtc0 $t0, MIPS_CP0_STATUS
+
 	/* Clear .bss */
 	la $t0, _bss_begin
 	la $t1, _bss_end

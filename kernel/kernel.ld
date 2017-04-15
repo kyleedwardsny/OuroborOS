@@ -3,6 +3,7 @@ INCLUDE config.ld
 SECTIONS
 {
 	. = KERNEL_LOAD_ADDR;
+	_kernel_begin = ABSOLUTE(.);
 
 	.text :
 	{
@@ -46,8 +47,10 @@ SECTIONS
 	_stack_top = ABSOLUTE(.);
 	. += 0x1000;
 	_stack_bottom = ABSOLUTE(.);
+	_stack_size = _stack_bottom - _stack_top;
 
-	_initrd_begin = 0x80200000;
-	_initrd_end = 0x80300000;
+	. = ALIGN(0x1000);
+	_kernel_end = ABSOLUTE(.);
+	_kernel_size = _kernel_end - _kernel_begin;
 }
 ENTRY(_start)
