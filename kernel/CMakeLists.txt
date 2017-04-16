@@ -3,12 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 
 include(OuCommon)
 
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_CURRENT_SOURCE_DIR}/kernel.ld -nostdlib")
-
 set(KERNEL_LOAD_ADDR 0x80010000)
-
-configure_file(config.ld.in config.ld)
-configure_file(fit/kernel.itsi.in fit/kernel.itsi)
 
 set(KERNEL_BIN "${CMAKE_CURRENT_BINARY_DIR}/kernel.bin")
 
@@ -22,15 +17,12 @@ add_custom_command(
 )
 add_custom_target(kernel-bin DEPENDS "${KERNEL_BIN}")
 
-ADD_SOURCES(
-	config.c
+add_sources(kernel.elf
 	eat_self.c
-	entry.S
-	head.S
 	main.c
-	mmu.c
 )
 
-add_executable(kernel.elf ${CURRENT_SOURCES})
+add_subdirectory("arch")
+
+finish_executable(kernel.elf)
 target_link_libraries(kernel.elf fdt ou gcc)
-set_property(TARGET kernel.elf APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/kernel.ld")

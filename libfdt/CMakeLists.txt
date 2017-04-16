@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 
 include(OuCommon)
 
-ADD_SOURCES(
+add_sources(fdt
 	fdt.c
 	fdt_addresses.c
 	fdt_empty_tree.c
@@ -15,4 +15,4 @@ ADD_SOURCES(
 	fdt_wip.c
 )
 
-add_library(fdt ${CURRENT_SOURCES})
+finish_library(fdt)

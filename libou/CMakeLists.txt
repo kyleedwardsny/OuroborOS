@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.5)
 
 include(OuCommon)
 
-ADD_SOURCES(
+add_sources(ou
 	_fprintf.c
 	memchr.c
 	memcmp.c
@@ -19,4 +19,4 @@ ADD_SOURCES(
 	vsprintf.c
 )
 
-add_library(ou ${CURRENT_SOURCES})
+finish_library(ou)

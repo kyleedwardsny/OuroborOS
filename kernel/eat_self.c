@@ -14,11 +14,3 @@ void vk_eat_self(const char *fmt, va_list args)
 	/* TODO Not using arguments for now */
 	k_hang();
 }
-
-void k_hang(void)
-{
-	__asm__("di");
-	for (;;) {
-		__asm__("wait");
-	}
-}

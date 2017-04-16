@@ -52,119 +52,10 @@ static int k_printf(const char *format, ...)
 	return retval;
 }
 
-static int num_tlb_pages = -1;
-
-static int check_entry_lo_validity(ou_uint32_t entry_lo)
+void k_main(void)
 {
-	if (entry_lo & BITS(31, 26)) {
-		return -1;
-	}
-
-	switch (entry_lo & MIPS_CP0_ENTRY_LO_C) {
-	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_CNWTNA):
-	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_U):
-	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_CNWBA):
-	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_UA):
-		break;
-
-	default:
-		return -1;
-	}
-
-	return 0;
-}
-
-static int check_tlb_entry_validity(int index, const struct mips_tlb_entry *entry)
-{
-	int err;
-
-	if (index >= num_tlb_pages) {
-		return -1;
-	}
-
-	if ((err = check_entry_lo_validity(entry->entry_lo0)) < 0) {
-		return err;
-	}
-
-	if ((err = check_entry_lo_validity(entry->entry_lo1)) < 0) {
-		return err;
-	}
-
-	if (entry->entry_ho & BITS(12, 8)) {
-		return -1;
-	}
-
-	switch (entry->page_mask & MIPS_CP0_PAGE_MASK_MASK) {
-	case MIPS_CP0_PAGE_MASK_MASK_4K:
-	case MIPS_CP0_PAGE_MASK_MASK_16K:
-	case MIPS_CP0_PAGE_MASK_MASK_64K:
-	case MIPS_CP0_PAGE_MASK_MASK_256K:
-	case MIPS_CP0_PAGE_MASK_MASK_1M:
-	case MIPS_CP0_PAGE_MASK_MASK_4M:
-	case MIPS_CP0_PAGE_MASK_MASK_16M:
-	case MIPS_CP0_PAGE_MASK_MASK_64M:
-	case MIPS_CP0_PAGE_MASK_MASK_256M:
-		break;
-
-	default:
-		return -1;
-	}
-
-	return 0;
-}
-
-static int set_tlb_entry(int index, const struct mips_tlb_entry *entry)
-{
-	int err;
-
-	if ((err = check_tlb_entry_validity(index, entry)) < 0) {
-		return err;
-	}
-
-	MTC0(entry->entry_lo0, MIPS_CP0_ENTRY_LO0);
-	MTC0(entry->entry_lo1, MIPS_CP0_ENTRY_LO1);
-	MTC0(entry->entry_ho, MIPS_CP0_ENTRY_HO);
-	MTC0(entry->page_mask, MIPS_CP0_PAGE_MASK);
-
-	if (index < 0) { /* Random index */
-		TLBWR();
-	} else {
-		MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
-		TLBWI();
-	}
-
-	return 0;
-}
-
-void k_main(void);
-
-static void print_spaces(unsigned int num_spaces)
-{
-	unsigned int i;
-
-	for (i = 0; i < num_spaces; i++) {
-		k_printf(" ");
-	}
-}
-
-static void traverse_fdt(const void *fdt, int parent, unsigned int level)
-{
-	int node;
-	int property;
-	int len;
-	const char *property_name;
-
-	fdt_for_each_property_offset(property, fdt, parent) {
-		fdt_getprop_by_offset(fdt, property, &property_name, &len);
-		print_spaces((level - 1) * 2);
-		k_printf("p %s %i\n", property_name, len);
-	}
-
-	fdt_for_each_subnode(node, fdt, parent) {
-		print_spaces((level - 1) * 2);
-		k_printf("n %s\n", fdt_get_name(fdt, node, NULL));
-		traverse_fdt(fdt, node, level + 1);
-	}
+	k_read_cpu_config();
+	k_clear_tlb();
 }
 
 void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
@@ -178,7 +69,6 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 			k_printf("Invalid FDT header\n");
 		} else {
 			k_printf("Valid FDT header\n");
-			traverse_fdt(fdt, 0, 1);
 		}
 		break;
 
@@ -187,10 +77,4 @@ void k_main_args(long arg0, unsigned long arg1, unsigned long arg2)
 	}
 
 	k_main();
-}
-
-void k_main(void)
-{
-	k_read_cpu_config();
-	k_clear_tlb();
 }

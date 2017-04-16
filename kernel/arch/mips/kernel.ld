@@ -1,4 +1,4 @@
-INCLUDE config.ld
+INCLUDE arch/mips/config.ld
 
 SECTIONS
 {
