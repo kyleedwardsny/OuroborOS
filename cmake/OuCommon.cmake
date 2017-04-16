@@ -48,8 +48,8 @@ macro(finish_executable TARGET)
 	get_link_script_flags(_ldflags "${TARGET}")
 	get_link_script(_ldscript "${TARGET}")
 
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_ldflags}")
 	add_executable("${TARGET}" ${_sources})
+	set_property(TARGET "${TARGET}" APPEND_STRING PROPERTY LINK_FLAGS " ${_ldflags}")
 	set_property(TARGET "${TARGET}" APPEND PROPERTY LINK_DEPENDS ${_ldscript})
 endmacro()
 
@@ -58,8 +58,8 @@ macro(finish_library TARGET)
 	get_link_script_flags(_ldflags "${TARGET}")
 	get_link_script(_ldscript "${TARGET}")
 
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${_ldflags}")
 	add_library("${TARGET}" ${_sources})
+	set_property(TARGET "${TARGET}" APPEND_STRING PROPERTY LINK_FLAGS " ${_ldflags}")
 	set_property(TARGET "${TARGET}" APPEND PROPERTY LINK_DEPENDS ${_ldscript})
 endmacro()
 
