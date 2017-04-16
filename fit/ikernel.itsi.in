@@ -5,6 +5,6 @@
 	arch = "mips";
 	os = "linux";
 	compression = "none";
-	load = <@KERNEL_LOAD_ADDR@>;
-	entry = <@KERNEL_LOAD_ADDR@>;
+	load = <@OU_IKERNEL_LOAD_ADDR@>;
+	entry = <@OU_IKERNEL_ENTRY_ADDR@>;
 };

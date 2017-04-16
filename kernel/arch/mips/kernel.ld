@@ -2,7 +2,7 @@ INCLUDE arch/mips/config.ld
 
 SECTIONS
 {
-	. = KERNEL_LOAD_ADDR;
+	. = _kernel_link_addr;
 	_kernel_begin = ABSOLUTE(.);
 
 	.text :

@@ -28,6 +28,8 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffreestanding -G0")
 find_program(MKIMAGE mkimage DOC "U-Boot uImage creator")
 find_program(DTC dtc DOC "Device tree compiler")
 
+include("config.cmake")
+
 add_subdirectory("libou")
 add_subdirectory("libfdt")
 add_subdirectory("kernel")

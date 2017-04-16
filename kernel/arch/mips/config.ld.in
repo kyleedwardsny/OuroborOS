@@ -1,1 +1,1 @@
-KERNEL_LOAD_ADDR = @KERNEL_LOAD_ADDR@;
+_kernel_link_addr = @OU_IKERNEL_LINK_ADDR@;
