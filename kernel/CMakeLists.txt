@@ -1,6 +1,8 @@
 project(ouroboros-kernel C ASM)
 cmake_minimum_required(VERSION 3.5)
 
+include(OuCommon)
+
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_CURRENT_SOURCE_DIR}/kernel.ld -nostdlib")
 
 set(KERNEL_LOAD_ADDR 0x80010000)
@@ -20,6 +22,15 @@ add_custom_command(
 )
 add_custom_target(kernel-bin DEPENDS "${KERNEL_BIN}")
 
-add_executable(kernel.elf head.S entry.S main.c eat_self.c config.c mmu.c)
+ADD_SOURCES(
+	config.c
+	eat_self.c
+	entry.S
+	head.S
+	main.c
+	mmu.c
+)
+
+add_executable(kernel.elf ${CURRENT_SOURCES})
 target_link_libraries(kernel.elf fdt ou gcc)
 set_property(TARGET kernel.elf APPEND PROPERTY LINK_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/kernel.ld")
