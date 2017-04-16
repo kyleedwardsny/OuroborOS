@@ -1,0 +1,13 @@
+set(i 0)
+while (i LESS 16)
+	math(EXPR mask "1 << ${i}")
+	if (NOT mask LESS OU_MAX_CORES)
+		set(OU_MAX_CORES_ALIGNED ${mask})
+		break()
+	endif()
+	math(EXPR i "${i} + 1")
+endwhile()
+
+if (NOT DEFINED OU_MAX_CORES_ALIGNED)
+	message(FATAL_ERROR "Could not set OU_MAX_CORES_ALIGNED")
+endif()

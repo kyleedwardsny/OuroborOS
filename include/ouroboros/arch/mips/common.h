@@ -3,8 +3,6 @@
 
 #include <ouroboros/common.h>
 
-#define MAX_CORES	(8)
-
 /* TODO mips64 */
 #define GPR_SIZE		(4)
 #define REGSTORE_SIZE		(32 * GPR_SIZE)

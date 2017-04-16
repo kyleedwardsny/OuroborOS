@@ -29,7 +29,9 @@ find_program(MKIMAGE mkimage DOC "U-Boot uImage creator")
 find_program(DTC dtc DOC "Device tree compiler")
 
 include("config.cmake")
+include("postconfig.cmake")
 
+add_subdirectory("include")
 add_subdirectory("libou")
 add_subdirectory("libfdt")
 add_subdirectory("kernel")

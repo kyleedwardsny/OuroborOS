@@ -1,1 +1,2 @@
-_kernel_link_addr = @OU_IKERNEL_LINK_ADDR@;
+_kernel_link_addr	= @OU_IKERNEL_LINK_ADDR@;
+_max_cores_aligned	= @OU_MAX_CORES_ALIGNED@;

@@ -39,7 +39,7 @@ SECTIONS
 		. = ALIGN(32);
 	}
 
-	. = ALIGN(0x400);
+	. = ALIGN(_max_cores_aligned * 32 * 4);
 
 	.bss.regstore :
 	{
