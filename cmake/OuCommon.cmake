@@ -72,7 +72,7 @@ macro(add_itb TARGET SOURCE)
 			-f "${_source}"
 			-D "-i ${CMAKE_BINARY_DIR} -O dtb"
 			"${_target}"
-		DEPENDS "${_source}"
+		DEPENDS "${_source}" ${ARGN}
 	)
 endmacro()
 
@@ -86,6 +86,6 @@ macro(add_dtb TARGET SOURCE)
 			-o "${_target}"
 			-i "${CMAKE_BINARY_DIR}"
 			"${_source}"
-		DEPENDS "${_source}"
+		DEPENDS "${_source}" ${ARGN}
 	)
 endmacro()
