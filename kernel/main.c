@@ -61,10 +61,10 @@ static int check_entry_lo_validity(ou_uint32_t entry_lo)
 	}
 
 	switch (entry_lo & MIPS_CP0_ENTRY_LO_C) {
-	case MIPS_CP0_ENTRY_LO_C_CNWTN:
-	case MIPS_CP0_ENTRY_LO_C_U:
-	case MIPS_CP0_ENTRY_LO_C_CNWBA:
-	case MIPS_CP0_ENTRY_LO_C_UA:
+	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_CNWTNA):
+	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_U):
+	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_CNWBA):
+	case MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_UA):
 		break;
 
 	default:

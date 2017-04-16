@@ -38,6 +38,18 @@ SECTIONS
 		*(.bss)
 		. = ALIGN(32);
 	}
+
+	. = ALIGN(0x400);
+
+	.bss.regstore :
+	{
+		*(.bss.regstore)
+	}
+
+	_regstore_begin = ABSOLUTE(k_regstore);
+	_regstore_upper = _regstore_begin >> 16;
+	_regstore_lower = _regstore_begin & 0xFFFF;
+
 	. = ALIGN(32);
 	_bss_end = .;
 	_bss_size = _bss_end - _bss_begin;

@@ -47,6 +47,19 @@ do {					\
 
 #endif /* __ASSEMBLER__ */
 
+/* Cache coherency attributes */
+#define MIPS_CP0_CACHE_ATTR			(0x7)
+#define MIPS_CP0_CACHE_ATTR_ATTR(attr)		((attr) & MIPS_CP0_CACHE_ATTR)
+
+/* Cacheable, noncoherent, write-through, no write allocate */
+#define MIPS_CP0_CACHE_ATTR_CNWTNA		(0x0)
+/* Uncached */
+#define MIPS_CP0_CACHE_ATTR_U			(0x2)
+/* Cacheable, noncoherent, write-back, write allocate */
+#define MIPS_CP0_CACHE_ATTR_CNWBA		(0x3)
+/* Uncached accelerated */
+#define MIPS_CP0_CACHE_ATTR_UA			(0x7)
+
 /* TLB array index */
 #define MIPS_CP0_INDEX				$0, 0
 
@@ -72,10 +85,7 @@ do {					\
 #define MIPS_CP0_ENTRY_LO_PFN_PFN(a)		(((a) >> 6) & MIPS_CP0_ENTRY_LO_PFN)
 /* Coherency */
 #define MIPS_CP0_ENTRY_LO_C			(0x00000038)
-#define MIPS_CP0_ENTRY_LO_C_CNWTN		(0x00000000)
-#define MIPS_CP0_ENTRY_LO_C_U			(0x00000010)
-#define MIPS_CP0_ENTRY_LO_C_CNWBA		(0x00000018)
-#define MIPS_CP0_ENTRY_LO_C_UA			(0x00000038)
+#define MIPS_CP0_ENTRY_LO_C_C(attr)		(MIPS_CP0_CACHE_ATTR_ATTR(attr) << 3)
 /* Dirty */
 #define MIPS_CP0_ENTRY_LO_D			(0x00000004)
 /* Valid */
@@ -327,8 +337,10 @@ do {					\
 #define MIPS_CP0_CONFIG_M			(0x80000000)
 /* Cacheability of kseg2 and kseg3 in FM */
 #define MIPS_CP0_CONFIG_K23			(0x70000000)
+#define MIPS_CP0_CONFIG_K23_K23(attr)		(MIPS_CP0_CACHE_ATTR_ATTR(attr) << 28)
 /* Cacheability of kuseg and useg in FM */
 #define MIPS_CP0_CONFIG_KU			(0x0E000000)
+#define MIPS_CP0_CONFIG_KU_KU(attr)		(MIPS_CP0_CACHE_ATTR_ATTR(attr) << 25)
 /* I-side ScratchPad RAM present */
 #define MIPS_CP0_CONFIG_ISP			(0x01000000)
 /* D-side ScratchPad RAM present */
@@ -351,17 +363,9 @@ do {					\
 #define MIPS_CP0_CONFIG_MT			(0x00000380)
 #define MIPS_CP0_CONFIG_MT_TLB			(0x00000080)
 #define MIPS_CP0_CONFIG_MT_FM			(0x00000180)
-
 /* Kseg0 coherency algorithm */
 #define MIPS_CP0_CONFIG_K0			(0x00000007)
-/* Cacheable, noncoherent, write-through, no write allocate */
-#define MIPS_CP0_CONFIG_K0_CNWTN		(0x00000000)
-/* Uncached */
-#define MIPS_CP0_CONFIG_K0_U			(0x00000002)
-/* Cacheable, noncoherent, write-back, write allocate */
-#define MIPS_CP0_CONFIG_K0_CNWBA		(0x00000003)
-/* Uncached accelerated */
-#define MIPS_CP0_CONFIG_K0_UA			(0x00000007)
+#define MIPS_CP0_CONFIG_K0_K0(attr)		(MIPS_CP0_CACHE_ATTR_ATTR(attr) << 0)
 
 /* Config1 Register */
 #define MIPS_CP0_CONFIG1			$16, 1
