@@ -11,98 +11,98 @@ k_regstore:
 
 	.section .text
 
-	.macro store_regs_k0
+	.macro store_regs kreg
 	.set noat
-	GPR_STORE $1, GPR_1_OFFSET($k0)
-	GPR_STORE $2, GPR_2_OFFSET($k0)
-	GPR_STORE $3, GPR_3_OFFSET($k0)
-	GPR_STORE $4, GPR_4_OFFSET($k0)
-	GPR_STORE $5, GPR_5_OFFSET($k0)
-	GPR_STORE $6, GPR_6_OFFSET($k0)
-	GPR_STORE $7, GPR_7_OFFSET($k0)
-	GPR_STORE $8, GPR_8_OFFSET($k0)
-	GPR_STORE $9, GPR_9_OFFSET($k0)
-	GPR_STORE $10, GPR_10_OFFSET($k0)
-	GPR_STORE $11, GPR_11_OFFSET($k0)
-	GPR_STORE $12, GPR_12_OFFSET($k0)
-	GPR_STORE $13, GPR_13_OFFSET($k0)
-	GPR_STORE $14, GPR_14_OFFSET($k0)
-	GPR_STORE $15, GPR_15_OFFSET($k0)
-	GPR_STORE $16, GPR_16_OFFSET($k0)
-	GPR_STORE $17, GPR_17_OFFSET($k0)
-	GPR_STORE $18, GPR_18_OFFSET($k0)
-	GPR_STORE $19, GPR_19_OFFSET($k0)
-	GPR_STORE $20, GPR_20_OFFSET($k0)
-	GPR_STORE $21, GPR_21_OFFSET($k0)
-	GPR_STORE $22, GPR_22_OFFSET($k0)
-	GPR_STORE $23, GPR_23_OFFSET($k0)
-	GPR_STORE $24, GPR_24_OFFSET($k0)
-	GPR_STORE $25, GPR_25_OFFSET($k0)
-	/* $26 is $k0, we will store this later */
-	GPR_STORE $27, GPR_27_OFFSET($k0)
-	GPR_STORE $28, GPR_28_OFFSET($k0)
-	GPR_STORE $29, GPR_29_OFFSET($k0)
-	GPR_STORE $30, GPR_30_OFFSET($k0)
-	GPR_STORE $31, GPR_31_OFFSET($k0)
+	GPR_STORE $1, GPR_1_OFFSET(\kreg)
+	GPR_STORE $2, GPR_2_OFFSET(\kreg)
+	GPR_STORE $3, GPR_3_OFFSET(\kreg)
+	GPR_STORE $4, GPR_4_OFFSET(\kreg)
+	GPR_STORE $5, GPR_5_OFFSET(\kreg)
+	GPR_STORE $6, GPR_6_OFFSET(\kreg)
+	GPR_STORE $7, GPR_7_OFFSET(\kreg)
+	GPR_STORE $8, GPR_8_OFFSET(\kreg)
+	GPR_STORE $9, GPR_9_OFFSET(\kreg)
+	GPR_STORE $10, GPR_10_OFFSET(\kreg)
+	GPR_STORE $11, GPR_11_OFFSET(\kreg)
+	GPR_STORE $12, GPR_12_OFFSET(\kreg)
+	GPR_STORE $13, GPR_13_OFFSET(\kreg)
+	GPR_STORE $14, GPR_14_OFFSET(\kreg)
+	GPR_STORE $15, GPR_15_OFFSET(\kreg)
+	GPR_STORE $16, GPR_16_OFFSET(\kreg)
+	GPR_STORE $17, GPR_17_OFFSET(\kreg)
+	GPR_STORE $18, GPR_18_OFFSET(\kreg)
+	GPR_STORE $19, GPR_19_OFFSET(\kreg)
+	GPR_STORE $20, GPR_20_OFFSET(\kreg)
+	GPR_STORE $21, GPR_21_OFFSET(\kreg)
+	GPR_STORE $22, GPR_22_OFFSET(\kreg)
+	GPR_STORE $23, GPR_23_OFFSET(\kreg)
+	GPR_STORE $24, GPR_24_OFFSET(\kreg)
+	GPR_STORE $25, GPR_25_OFFSET(\kreg)
+	/* $26 and $27 are $k0 and $k1, we will store these later */
+	GPR_STORE $28, GPR_28_OFFSET(\kreg)
+	GPR_STORE $29, GPR_29_OFFSET(\kreg)
+	GPR_STORE $30, GPR_30_OFFSET(\kreg)
+	GPR_STORE $31, GPR_31_OFFSET(\kreg)
 	.set at
 	.endm
 
-	.macro load_regs_k0
+	.macro load_regs kreg
 	.set noat
-	GPR_LOAD $1, GPR_1_OFFSET($k0)
-	GPR_LOAD $2, GPR_2_OFFSET($k0)
-	GPR_LOAD $3, GPR_3_OFFSET($k0)
-	GPR_LOAD $4, GPR_4_OFFSET($k0)
-	GPR_LOAD $5, GPR_5_OFFSET($k0)
-	GPR_LOAD $6, GPR_6_OFFSET($k0)
-	GPR_LOAD $7, GPR_7_OFFSET($k0)
-	GPR_LOAD $8, GPR_8_OFFSET($k0)
-	GPR_LOAD $9, GPR_9_OFFSET($k0)
-	GPR_LOAD $10, GPR_10_OFFSET($k0)
-	GPR_LOAD $11, GPR_11_OFFSET($k0)
-	GPR_LOAD $12, GPR_12_OFFSET($k0)
-	GPR_LOAD $13, GPR_13_OFFSET($k0)
-	GPR_LOAD $14, GPR_14_OFFSET($k0)
-	GPR_LOAD $15, GPR_15_OFFSET($k0)
-	GPR_LOAD $16, GPR_16_OFFSET($k0)
-	GPR_LOAD $17, GPR_17_OFFSET($k0)
-	GPR_LOAD $18, GPR_18_OFFSET($k0)
-	GPR_LOAD $19, GPR_19_OFFSET($k0)
-	GPR_LOAD $20, GPR_20_OFFSET($k0)
-	GPR_LOAD $21, GPR_21_OFFSET($k0)
-	GPR_LOAD $22, GPR_22_OFFSET($k0)
-	GPR_LOAD $23, GPR_23_OFFSET($k0)
-	GPR_LOAD $24, GPR_24_OFFSET($k0)
-	GPR_LOAD $25, GPR_25_OFFSET($k0)
-	/* $26 is $k0, we will load this later */
-	GPR_LOAD $27, GPR_27_OFFSET($k0)
-	GPR_LOAD $28, GPR_28_OFFSET($k0)
-	GPR_LOAD $29, GPR_29_OFFSET($k0)
-	GPR_LOAD $30, GPR_30_OFFSET($k0)
-	GPR_LOAD $31, GPR_31_OFFSET($k0)
+	GPR_LOAD $1, GPR_1_OFFSET(\kreg)
+	GPR_LOAD $2, GPR_2_OFFSET(\kreg)
+	GPR_LOAD $3, GPR_3_OFFSET(\kreg)
+	GPR_LOAD $4, GPR_4_OFFSET(\kreg)
+	GPR_LOAD $5, GPR_5_OFFSET(\kreg)
+	GPR_LOAD $6, GPR_6_OFFSET(\kreg)
+	GPR_LOAD $7, GPR_7_OFFSET(\kreg)
+	GPR_LOAD $8, GPR_8_OFFSET(\kreg)
+	GPR_LOAD $9, GPR_9_OFFSET(\kreg)
+	GPR_LOAD $10, GPR_10_OFFSET(\kreg)
+	GPR_LOAD $11, GPR_11_OFFSET(\kreg)
+	GPR_LOAD $12, GPR_12_OFFSET(\kreg)
+	GPR_LOAD $13, GPR_13_OFFSET(\kreg)
+	GPR_LOAD $14, GPR_14_OFFSET(\kreg)
+	GPR_LOAD $15, GPR_15_OFFSET(\kreg)
+	GPR_LOAD $16, GPR_16_OFFSET(\kreg)
+	GPR_LOAD $17, GPR_17_OFFSET(\kreg)
+	GPR_LOAD $18, GPR_18_OFFSET(\kreg)
+	GPR_LOAD $19, GPR_19_OFFSET(\kreg)
+	GPR_LOAD $20, GPR_20_OFFSET(\kreg)
+	GPR_LOAD $21, GPR_21_OFFSET(\kreg)
+	GPR_LOAD $22, GPR_22_OFFSET(\kreg)
+	GPR_LOAD $23, GPR_23_OFFSET(\kreg)
+	GPR_LOAD $24, GPR_24_OFFSET(\kreg)
+	GPR_LOAD $25, GPR_25_OFFSET(\kreg)
+	/* $26 and $27 are $k0 and $k1, we will load these later */
+	GPR_LOAD $28, GPR_28_OFFSET(\kreg)
+	GPR_LOAD $29, GPR_29_OFFSET(\kreg)
+	GPR_LOAD $30, GPR_30_OFFSET(\kreg)
+	GPR_LOAD $31, GPR_31_OFFSET(\kreg)
 	.set at
 	.endm
 
-	.macro get_ebase_k0
-	mfc0 $k0, MIPS_CP0_EBASE
-	andi $k0, MIPS_CP0_EBASE_CPUNUM
-	sll $k0, (16 + REGSTORE_CORE_SHIFT)
+	.macro get_ebase kreg
+	mfc0 \kreg, MIPS_CP0_EBASE
+	andi \kreg, MIPS_CP0_EBASE_CPUNUM
+	sll \kreg, (16 + REGSTORE_CORE_SHIFT)
 
-	ori $k0, _regstore_upper
-	rotr $k0, 16
-	ori $k0, _regstore_lower
+	ori \kreg, _regstore_upper
+	rotr \kreg, 16
+	ori \kreg, _regstore_lower
 	.endm
 
 	.type _entry_basic, function
 _entry_basic:
-	get_ebase_k0
-	store_regs_k0
+	get_ebase $k0
+	store_regs $k0
+	GPR_STORE $k1, GPR_27_OFFSET($k0)
 
 	/* TODO Do kernel stuff */
 
-	get_ebase_k0
-	load_regs_k0
+	get_ebase $k0
+	load_regs $k0
 	move $k0, $0 /* For security - don't leak $k0 */
+	GPR_LOAD $k1, GPR_27_OFFSET($k0)
 
 	eret
 
@@ -110,8 +110,9 @@ _entry_basic:
 _entry_user_local:
 	mtc0 $k0, MIPS_CP0_USER_LOCAL
 
-	get_ebase_k0
-	store_regs_k0
+	get_ebase $k0
+	store_regs $k0
+	GPR_STORE $k1, GPR_27_OFFSET($k0)
 
 	move $k1, $k0
 	mfc0 $k0, MIPS_CP0_USER_LOCAL
@@ -119,9 +120,10 @@ _entry_user_local:
 
 	/* TODO Do kernel stuff */
 
-	get_ebase_k0
-	load_regs_k0
-	GPR_LOAD $26, GPR_26_OFFSET($k0)
+	get_ebase $k0
+	load_regs $k0
+	GPR_LOAD $k1, GPR_27_OFFSET($k0) /* This MUST be done before $k0 */
+	GPR_LOAD $k0, GPR_26_OFFSET($k0)
 
 	eret
 

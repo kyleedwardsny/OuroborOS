@@ -89,3 +89,11 @@ macro(add_dtb TARGET SOURCE)
 		DEPENDS "${_source}" ${ARGN}
 	)
 endmacro()
+
+macro(bool_config_integer CONFIG_NAME)
+	if ("${${CONFIG_NAME}}")
+		set("${CONFIG_NAME}" 1)
+	else()
+		set("${CONFIG_NAME}" 0)
+	endif()
+endmacro()
