@@ -14,12 +14,13 @@
 			};
 		};
 
-		fdt@1 {
-			description = "my-fdt";
-			data = /incbin/("dts/qemu_mips.dtb");
-			type = "flat_dt";
-			arch = "mips";
-			compression = "none";
+		ou_fdt: fdt@1 {
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
 		};
 	};
 
@@ -33,4 +34,5 @@
 	};
 };
 
-/include/ "kernel.itsi"
+/include/ "fit/ikernel.itsi"
+/include/ "fit/fdt.itsi"

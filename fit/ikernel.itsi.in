@@ -1,6 +1,6 @@
 &ou_ikernel {
 	description = "OuroborOS kernel";
-	data = /incbin/("../kernel.bin");
+	data = /incbin/("kernel/kernel.bin");
 	type = "kernel";
 	arch = "mips";
 	os = "linux";

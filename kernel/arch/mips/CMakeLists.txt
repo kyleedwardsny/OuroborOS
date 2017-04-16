@@ -9,4 +9,3 @@ add_sources(kernel.elf
 set_link_script(kernel.elf kernel.ld)
 
 configure_file(config.ld.in config.ld)
-configure_file(its/kernel.itsi.in its/kernel.itsi)

@@ -1,0 +1,7 @@
+&ou_fdt {
+	description = "OuroborOS device tree";
+	data = /incbin/("fdt/qemu_mips.dtb");
+	type = "flat_dt";
+	arch = "mips";
+	compression = "none";
+};
