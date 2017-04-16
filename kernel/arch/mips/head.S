@@ -19,6 +19,13 @@ _start:
 	mtc0 $t0, MIPS_CP0_CONFIG
 
 0:
+	/* We have to load this into a register, otherwise the top few bits get
+	 * cut off in the j instruction
+	 */
+	la $t0, _kseg0
+	jr $t0
+
+_kseg0:
 	/* Clear .bss */
 	la $t0, _bss_begin
 	la $t1, _bss_end
