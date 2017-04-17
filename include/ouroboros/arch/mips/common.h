@@ -53,15 +53,20 @@
 
 #ifndef __ASSEMBLER__
 
+#include <ouroboros/common.h>
 #include <ouroboros/stddef.h>
 
 typedef const void * gpr_ptr_t;
 typedef ou_size_t gpr_u_t;
 typedef ou_ptrdiff_t gpr_s_t;
 
-typedef gpr_ptr_t gpr_u_t;
+typedef union {
+	gpr_ptr_t ptr;
+	gpr_u_t u;
+	gpr_s_t s;
+} gpr_t;
 
-BEGIN_PACKED_STRUCT(mips_regstore) {
+PACKED_STRUCT_BEGIN(mips_regstore) {
 	gpr_t _reserved;
 	gpr_t gpr_1;
 	gpr_t gpr_2;
@@ -94,7 +99,7 @@ BEGIN_PACKED_STRUCT(mips_regstore) {
 	gpr_t gpr_29;
 	gpr_t gpr_30;
 	gpr_t gpr_31;
-} END_PACKED_STRUCT;
+} PACKED_STRUCT_END;
 
 #endif /* __ASSEMBLER__ */
 

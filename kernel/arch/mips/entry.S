@@ -14,6 +14,7 @@ k_regstore:
 	.macro store_regs kreg
 	.set noat
 	GPR_STORE $1, GPR_1_OFFSET(\kreg)
+	.set at
 	GPR_STORE $2, GPR_2_OFFSET(\kreg)
 	GPR_STORE $3, GPR_3_OFFSET(\kreg)
 	GPR_STORE $4, GPR_4_OFFSET(\kreg)
@@ -43,12 +44,12 @@ k_regstore:
 	GPR_STORE $29, GPR_29_OFFSET(\kreg)
 	GPR_STORE $30, GPR_30_OFFSET(\kreg)
 	GPR_STORE $31, GPR_31_OFFSET(\kreg)
-	.set at
 	.endm
 
 	.macro load_regs kreg
 	.set noat
 	GPR_LOAD $1, GPR_1_OFFSET(\kreg)
+	.set at
 	GPR_LOAD $2, GPR_2_OFFSET(\kreg)
 	GPR_LOAD $3, GPR_3_OFFSET(\kreg)
 	GPR_LOAD $4, GPR_4_OFFSET(\kreg)
@@ -78,7 +79,6 @@ k_regstore:
 	GPR_LOAD $29, GPR_29_OFFSET(\kreg)
 	GPR_LOAD $30, GPR_30_OFFSET(\kreg)
 	GPR_LOAD $31, GPR_31_OFFSET(\kreg)
-	.set at
 	.endm
 
 	.macro get_ebase kreg

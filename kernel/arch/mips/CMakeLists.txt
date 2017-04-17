@@ -7,6 +7,7 @@ add_sources(kernel.elf
 	head.S
 	hang.c
 	mmu.c
+	shadow.c
 )
 
 set_link_script(kernel.elf kernel.ld)
