@@ -1,3 +1,4 @@
+#include <ouroboros/arch/mips/common.h>
 #include <ouroboros/arch/mips/cp0.h>
 
 	.section .text.start
@@ -45,7 +46,7 @@ _kseg0:
 	b 0b
 
 0:
-	la $sp, _stack_bottom
+	la $sp, _stack_begin + STACK_SIZE
 
 	jal k_main_args
 

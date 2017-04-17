@@ -56,10 +56,11 @@ SECTIONS
 
 	. = ALIGN(0x1000);
 
-	_stack_top = ABSOLUTE(.);
-	. += 0x1000;
-	_stack_bottom = ABSOLUTE(.);
-	_stack_size = _stack_bottom - _stack_top;
+	_single_stack_size = 0x1000;
+	_stack_begin = ABSOLUTE(.);
+	. += _single_stack_size * _max_cores_aligned;
+	_stack_end = ABSOLUTE(.);
+	_stack_size = _stack_end - _stack_begin;
 
 	. = ALIGN(0x1000);
 	_kernel_end = ABSOLUTE(.);

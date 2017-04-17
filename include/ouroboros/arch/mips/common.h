@@ -3,17 +3,21 @@
 
 #include <ouroboros/common.h>
 
+#define STACK_SIZE_LOG		(10)
+#define STACK_SIZE		(1 << STACK_SIZE_LOG)
+
 /* TODO mips64 */
-#define GPR_SIZE		(4)
-#define REGSTORE_SIZE		(32 * GPR_SIZE)
-#define REGSTORE_CORE_SHIFT	(7)
+#define GPR_SIZE_LOG		(2)
+#define GPR_SIZE		(1 << GPR_SIZE_LOG)
+#define REGSTORE_SIZE_LOG	(5 + GPR_SIZE_LOG)
+#define REGSTORE_SIZE		(1 << REGSTORE_SIZE_LOG)
+#define REGSTORE_CORE_SHIFT	(REGSTORE_SIZE_LOG)
+#define GPR_STORE		sw
+#define GPR_LOAD		lw
 
 #if (1 << REGSTORE_CORE_SHIFT) != REGSTORE_SIZE
 #error "Incorrect REGSTORE_CORE_SHIFT value"
 #endif
-
-#define GPR_STORE	sw
-#define GPR_LOAD	lw
 
 #define GPR_1_OFFSET	(GPR_SIZE * 1)
 #define GPR_2_OFFSET	(GPR_SIZE * 2)

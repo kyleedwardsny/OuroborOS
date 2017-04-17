@@ -91,11 +91,22 @@ k_regstore:
 	ori \kreg, _regstore_lower
 	.endm
 
+	.macro get_sp
+	mfc0 $t0, MIPS_CP0_EBASE
+	andi $t0, MIPS_CP0_EBASE_CPUNUM
+	sll $t0, STACK_SIZE_LOG
+
+	la $sp, _stack_begin + STACK_SIZE /* Bottom of stack */
+	add $sp, $t0
+	.endm
+
 	.type _entry_basic, function
 _entry_basic:
 	get_ebase $k0
 	store_regs $k0
 	GPR_STORE $k1, GPR_27_OFFSET($k0)
+
+	get_sp
 
 	/* TODO Do kernel stuff */
 
@@ -117,6 +128,8 @@ _entry_user_local:
 	move $k1, $k0
 	mfc0 $k0, MIPS_CP0_USER_LOCAL
 	GPR_STORE $k0, GPR_26_OFFSET($k1)
+
+	get_sp
 
 	/* TODO Do kernel stuff */
 
