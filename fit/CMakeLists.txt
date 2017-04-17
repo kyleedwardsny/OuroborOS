@@ -6,5 +6,13 @@ include(OuCommon)
 configure_file(ikernel.itsi.in ikernel.itsi)
 configure_file(fdt.itsi.in fdt.itsi)
 
-add_itb(image.itb image.its "${CMAKE_CURRENT_BINARY_DIR}/ikernel.itsi" "${CMAKE_CURRENT_BINARY_DIR}/fdt.itsi" kernel-bin dtb)
+add_itb(image.itb image.its
+	"${CMAKE_CURRENT_BINARY_DIR}/ikernel.itsi"
+	"${CMAKE_CURRENT_BINARY_DIR}/fdt.itsi"
+	kernel-bin
+	"${CMAKE_BINARY_DIR}/kernel/kernel.bin"
+	dtb
+	"${CMAKE_BINARY_DIR}/fdt/qemu_mips.dtb"
+)
+
 add_custom_target(itb ALL DEPENDS image.itb)
