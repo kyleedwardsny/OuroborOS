@@ -140,6 +140,13 @@ _entry_user_local:
 
 	eret
 
+_entry_shadow:
+	get_sp
+
+	/* TODO Do kernel stuff */
+
+	eret
+
 	.section .text.evt
 
 	.macro next_evt
@@ -172,6 +179,10 @@ _evt_basic_general_exception:
 	j _entry_basic
 
 	evt_interrupt evt_basic 0
+_evt_basic_interrupt_0:
+	j _entry_basic
+
+	next_evt
 
 	.global evt_user_local
 	.type evt_user_local, function
@@ -184,5 +195,27 @@ _evt_user_local_tlb_refill:
 	evt_general_exception evt_user_local
 _evt_user_local_general_exception:
 	j _entry_user_local
+
+	evt_interrupt evt_user_local 0
+_evt_user_local_interrupt_0:
+	j _entry_user_local
+
+	next_evt
+
+	.global evt_shadow
+	.type evt_shadow, function
+evt_shadow:
+
+	evt_tlb_refill evt_shadow
+_evt_shadow_tlb_refill:
+	j _entry_shadow
+
+	evt_general_exception evt_shadow
+_evt_shadow_general_exception:
+	j _entry_shadow
+
+	evt_interrupt evt_shadow 0
+_evt_shadow_interrupt_0:
+	j _entry_shadow
 
 	next_evt
