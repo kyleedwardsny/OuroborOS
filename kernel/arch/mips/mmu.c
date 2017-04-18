@@ -2,13 +2,12 @@
 
 #include <ouroboros/kernel/config.h>
 
+#include <ouroboros/arch/mips/config.h>
 #include <ouroboros/arch/mips/cp0.h>
 
 #include <ouroboros/common.h>
 #include <ouroboros/errno.h>
 #include <ouroboros/stddef.h>
-
-#include "config.h"
 
 int _kernel_begin;
 int _kernel_size;

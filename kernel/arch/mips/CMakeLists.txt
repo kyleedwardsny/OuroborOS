@@ -1,5 +1,4 @@
-include("config.cmake")
-include("postconfig.cmake")
+include(OuCommon)
 
 add_sources(kernel.elf
 	config.c
@@ -13,4 +12,3 @@ add_sources(kernel.elf
 set_link_script(kernel.elf kernel.ld)
 
 configure_file(config.ld.in config.ld)
-configure_file(genconfig.h.in genconfig.h)

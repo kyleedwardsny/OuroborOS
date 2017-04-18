@@ -1,5 +1,3 @@
-configure_file(ouroboros/genconfig.h.in ouroboros/genconfig.h)
-
 set(ARCH_DIR "ouroboros/arch")
 set(ARCH_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/${ARCH_DIR}")
 set(ARCH_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${ARCH_DIR}")

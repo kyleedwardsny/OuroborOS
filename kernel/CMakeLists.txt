@@ -23,7 +23,9 @@ add_sources(kernel.elf
 )
 
 add_subdirectory("arch")
+add_subdirectory("include")
 
 finish_executable(kernel.elf)
 set_property(TARGET kernel.elf APPEND_STRING PROPERTY LINK_FLAGS " -nostdlib")
 target_link_libraries(kernel.elf fdt ou gcc)
+target_include_directories(kernel.elf PRIVATE include)

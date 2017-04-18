@@ -1,5 +1,4 @@
-#include "config.h"
-
+#include <ouroboros/arch/mips/config.h>
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/entry.h>
 #include <ouroboros/errno.h>

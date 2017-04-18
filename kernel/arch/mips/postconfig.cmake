@@ -1,4 +1,0 @@
-include(OuCommon)
-
-bool_config_integer(OU_MIPS_IKERNEL_CLOBBER_K0)
-bool_config_integer(OU_MIPS_IKERNEL_CLOBBER_K1)
