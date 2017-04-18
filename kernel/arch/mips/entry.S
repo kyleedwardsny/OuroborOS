@@ -1,13 +1,13 @@
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/common.h>
-#include <ouroboros/config.h>
+#include <ouroboros/genconfig.h>
 
 	.section .bss.regstore
 
 	.global k_regstore
 	.type k_regstore, object
 k_regstore:
-	.fill OU_MAX_CORES_ALIGNED * 32, GPR_SIZE
+	.fill OU_MAX_CORES * 32, GPR_SIZE
 
 	.section .text
 

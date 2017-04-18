@@ -13,4 +13,4 @@ add_sources(kernel.elf
 set_link_script(kernel.elf kernel.ld)
 
 configure_file(config.ld.in config.ld)
-configure_file(config.h.in config.h)
+configure_file(genconfig.h.in genconfig.h)

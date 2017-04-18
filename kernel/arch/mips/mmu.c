@@ -8,6 +8,8 @@
 #include <ouroboros/errno.h>
 #include <ouroboros/stddef.h>
 
+#include "config.h"
+
 int _kernel_begin;
 int _kernel_size;
 

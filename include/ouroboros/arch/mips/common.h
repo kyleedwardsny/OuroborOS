@@ -3,6 +3,8 @@
 
 #include <ouroboros/common.h>
 
+#include <ouroboros/arch/mips/cp0.h>
+
 #define STACK_SIZE_LOG		(10)
 #define STACK_SIZE		(1 << STACK_SIZE_LOG)
 
@@ -100,6 +102,14 @@ PACKED_STRUCT_BEGIN(mips_regstore) {
 	gpr_t gpr_30;
 	gpr_t gpr_31;
 } PACKED_STRUCT_END;
+
+static inline unsigned int k_get_current_cpu()
+{
+	gpr_u_t ebase;
+
+	MFC0(ebase, MIPS_CP0_EBASE);
+	return (ebase & MIPS_CP0_EBASE_CPUNUM) >> 0;
+}
 
 #endif /* __ASSEMBLER__ */
 
