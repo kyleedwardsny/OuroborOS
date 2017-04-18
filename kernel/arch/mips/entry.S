@@ -81,6 +81,15 @@ k_regstore:
 	GPR_LOAD $31, GPR_31_OFFSET(\kreg)
 	.endm
 
+	.macro get_ebase_2 kreg_addr kreg_clobber
+	mfc0 \kreg_clobber, MIPS_CP0_EBASE
+	andi \kreg_clobber, MIPS_CP0_EBASE_CPUNUM
+	sll \kreg_clobber, REGSTORE_CORE_SHIFT
+
+	la \kreg_addr, k_regstore
+	add \kreg_addr, \kreg_clobber
+	.endm
+
 	.macro get_ebase kreg
 	mfc0 \kreg, MIPS_CP0_EBASE
 	andi \kreg, MIPS_CP0_EBASE_CPUNUM
@@ -100,8 +109,25 @@ k_regstore:
 	add $sp, $t0
 	.endm
 
-	.type _entry_basic, function
-_entry_basic:
+	.type _entry_k0_k1, function
+_entry_k0_k1:
+	get_ebase_2 $k0, $k1
+	store_regs $k0
+
+	get_sp
+
+	/* TODO Do kernel stuff */
+
+	get_ebase_2 $k0, $k1
+	load_regs $k0
+	/* For security, don't leak this info */
+	move $k0, $0
+	move $k1, $0
+
+	eret
+
+	.type _entry_k0_rotr, function
+_entry_k0_rotr:
 	get_ebase $k0
 	store_regs $k0
 	GPR_STORE $k1, GPR_27_OFFSET($k0)
@@ -110,15 +136,80 @@ _entry_basic:
 
 	/* TODO Do kernel stuff */
 
-	get_ebase $k0
+	get_ebase_2 $k0, $k1
 	load_regs $k0
-	move $k0, $0 /* For security - don't leak $k0 */
 	GPR_LOAD $k1, GPR_27_OFFSET($k0)
+	/* For security, don't leak this info */
+	move $k0, $0
 
 	eret
 
-	.type _entry_user_local, function
-_entry_user_local:
+	.type _entry_k1_rotr, function
+_entry_k1_rotr:
+	get_ebase $k1
+	store_regs $k1
+	GPR_STORE $k0, GPR_26_OFFSET($k1)
+
+	get_sp
+
+	/* TODO Do kernel stuff */
+
+	get_ebase_2 $k1, $k0
+	load_regs $k1
+	GPR_LOAD $k0, GPR_26_OFFSET($k1)
+	/* For security, don't leak this info */
+	move $k1, $0
+
+	eret
+
+	.type _entry_k0_ul, function
+_entry_k0_ul:
+	mtc0 $k1, MIPS_CP0_USER_LOCAL
+
+	get_ebase_2 $k1, $k0
+	store_regs $k1
+
+	move $k0, $k1
+	mfc0 $k1, MIPS_CP0_USER_LOCAL
+	GPR_STORE $k1, GPR_27_OFFSET($k0)
+
+	get_sp
+
+	/* TODO Do kernel stuff */
+
+	get_ebase_2 $k0, $k1
+	load_regs $k0
+	GPR_LOAD $k1, GPR_27_OFFSET($k0) /* This MUST be done before $k0 */
+	/* For security, don't leak this info */
+	move $k0, $0
+
+	eret
+
+	.type _entry_k1_ul, function
+_entry_k1_ul:
+	mtc0 $k0, MIPS_CP0_USER_LOCAL
+
+	get_ebase_2 $k0, $k1
+	store_regs $k0
+
+	move $k1, $k0
+	mfc0 $k0, MIPS_CP0_USER_LOCAL
+	GPR_STORE $k0, GPR_26_OFFSET($k1)
+
+	get_sp
+
+	/* TODO Do kernel stuff */
+
+	get_ebase_2 $k1, $k0
+	load_regs $k1
+	GPR_LOAD $k0, GPR_26_OFFSET($k1)
+	/* For security, don't leak this info */
+	move $k1, $0
+
+	eret
+
+	.type _entry_ul_rotr, function
+_entry_ul_rotr:
 	mtc0 $k0, MIPS_CP0_USER_LOCAL
 
 	get_ebase $k0
@@ -133,9 +224,9 @@ _entry_user_local:
 
 	/* TODO Do kernel stuff */
 
-	get_ebase $k0
+	get_ebase_2 $k0, $k1
 	load_regs $k0
-	GPR_LOAD $k1, GPR_27_OFFSET($k0) /* This MUST be done before $k0 */
+	GPR_LOAD $k1, GPR_27_OFFSET($k0)
 	GPR_LOAD $k0, GPR_26_OFFSET($k0)
 
 	eret
@@ -165,57 +256,29 @@ _entry_shadow:
 	.org \evt + 0x200 + (\int_num * 0x80)
 	.endm
 
+	.macro evt name
 	next_evt
-	.global evt_basic
-	.type evt_basic, function
-evt_basic:
+	.global evt_\name
+	.type evt_\name, function
+evt_\name:
 
-	evt_tlb_refill evt_basic
-_evt_basic_tlb_refill:
-	j _entry_basic
+	evt_tlb_refill evt_\name
+_evt_\name\()_tlb_refill:
+	j _entry_\name
 
-	evt_general_exception evt_basic
-_evt_basic_general_exception:
-	j _entry_basic
+	evt_general_exception evt_\name
+_evt_\name\()_general_exception:
+	j _entry_\name
 
-	evt_interrupt evt_basic 0
-_evt_basic_interrupt_0:
-	j _entry_basic
+	evt_interrupt evt_\name 0
+_evt_\name\()_interrupt_0:
+	j _entry_\name
+	.endm
 
-	next_evt
-
-	.global evt_user_local
-	.type evt_user_local, function
-evt_user_local:
-
-	evt_tlb_refill evt_user_local
-_evt_user_local_tlb_refill:
-	j _entry_user_local
-
-	evt_general_exception evt_user_local
-_evt_user_local_general_exception:
-	j _entry_user_local
-
-	evt_interrupt evt_user_local 0
-_evt_user_local_interrupt_0:
-	j _entry_user_local
-
-	next_evt
-
-	.global evt_shadow
-	.type evt_shadow, function
-evt_shadow:
-
-	evt_tlb_refill evt_shadow
-_evt_shadow_tlb_refill:
-	j _entry_shadow
-
-	evt_general_exception evt_shadow
-_evt_shadow_general_exception:
-	j _entry_shadow
-
-	evt_interrupt evt_shadow 0
-_evt_shadow_interrupt_0:
-	j _entry_shadow
-
-	next_evt
+	evt k0_k1
+	evt k0_rotr
+	evt k1_rotr
+	evt k0_ul
+	evt k1_ul
+	evt ul_rotr
+	evt shadow
