@@ -5,6 +5,7 @@ add_sources(ikernel.elf
 	entry.S
 	head.S
 	hang.c
+	main.c
 	mmu.c
 	shadow.c
 )

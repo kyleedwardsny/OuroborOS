@@ -57,7 +57,6 @@ _kseg0:
 0:
 	la $sp, _stack_begin + STACK_SIZE
 
-	jal k_main_args
-
-0:
-	b 0b
+	/* This should never return */
+	bal k_main_args
+	b k_hang

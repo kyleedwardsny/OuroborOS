@@ -115,8 +115,7 @@ _entry_k0_k1:
 	store_regs $k0
 
 	get_sp
-
-	/* TODO Do kernel stuff */
+	bal k_entry
 
 	get_ebase_2 $k0, $k1
 	load_regs $k0
@@ -133,8 +132,7 @@ _entry_k0_rotr:
 	GPR_STORE $k1, GPR_27_OFFSET($k0)
 
 	get_sp
-
-	/* TODO Do kernel stuff */
+	bal k_entry
 
 	get_ebase_2 $k0, $k1
 	load_regs $k0
@@ -151,8 +149,7 @@ _entry_k1_rotr:
 	GPR_STORE $k0, GPR_26_OFFSET($k1)
 
 	get_sp
-
-	/* TODO Do kernel stuff */
+	bal k_entry
 
 	get_ebase_2 $k1, $k0
 	load_regs $k1
@@ -174,8 +171,7 @@ _entry_k0_ul:
 	GPR_STORE $k1, GPR_27_OFFSET($k0)
 
 	get_sp
-
-	/* TODO Do kernel stuff */
+	bal k_entry
 
 	get_ebase_2 $k0, $k1
 	load_regs $k0
@@ -197,8 +193,7 @@ _entry_k1_ul:
 	GPR_STORE $k0, GPR_26_OFFSET($k1)
 
 	get_sp
-
-	/* TODO Do kernel stuff */
+	bal k_entry
 
 	get_ebase_2 $k1, $k0
 	load_regs $k1
@@ -221,8 +216,7 @@ _entry_ul_rotr:
 	GPR_STORE $k0, GPR_26_OFFSET($k1)
 
 	get_sp
-
-	/* TODO Do kernel stuff */
+	bal k_entry
 
 	get_ebase_2 $k0, $k1
 	load_regs $k0
