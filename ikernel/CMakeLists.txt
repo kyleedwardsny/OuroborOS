@@ -11,13 +11,12 @@ add_custom_command(
 	OUTPUT "${KERNEL_BIN}"
 	COMMAND "${CMAKE_OBJCOPY}"
 		-O binary
-		$<TARGET_FILE:kernel.elf>
+		$<TARGET_FILE:ikernel.elf>
 		"${KERNEL_BIN}"
-	DEPENDS $<TARGET_FILE:kernel.elf>
 )
 add_custom_target(kernel-bin DEPENDS "${KERNEL_BIN}")
 
-add_sources(kernel.elf
+add_sources(ikernel.elf
 	eat_self.c
 	main.c
 )
@@ -25,7 +24,7 @@ add_sources(kernel.elf
 add_subdirectory("arch")
 add_subdirectory("include")
 
-finish_executable(kernel.elf)
-set_property(TARGET kernel.elf APPEND_STRING PROPERTY LINK_FLAGS " -nostdlib")
-target_link_libraries(kernel.elf fdt ou gcc)
-target_include_directories(kernel.elf PRIVATE include)
+finish_executable(ikernel.elf)
+set_property(TARGET ikernel.elf APPEND_STRING PROPERTY LINK_FLAGS " -nostdlib")
+target_link_libraries(ikernel.elf fdt ou gcc)
+target_include_directories(ikernel.elf PRIVATE include)

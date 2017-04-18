@@ -1,4 +1,4 @@
-#include <ouroboros/kernel/eat_self.h>
+#include <ouroboros/ikernel/eat_self.h>
 
 void k_hang(void)
 {

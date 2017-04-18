@@ -2,7 +2,7 @@
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/entry.h>
 #include <ouroboros/errno.h>
-#include <ouroboros/kernel/config.h>
+#include <ouroboros/ikernel/config.h>
 
 #include <ouroboros/stdint.h>
 

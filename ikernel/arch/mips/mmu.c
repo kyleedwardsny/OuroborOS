@@ -1,6 +1,6 @@
-#include <ouroboros/kernel/mmu.h>
+#include <ouroboros/ikernel/mmu.h>
 
-#include <ouroboros/kernel/config.h>
+#include <ouroboros/ikernel/config.h>
 
 #include <ouroboros/arch/mips/config.h>
 #include <ouroboros/arch/mips/cp0.h>

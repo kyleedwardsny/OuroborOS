@@ -2,9 +2,9 @@
 #include <ouroboros/common.h>
 #include <ouroboros/hw/uart/16550.h>
 
-#include <ouroboros/kernel/config.h>
-#include <ouroboros/kernel/eat_self.h>
-#include <ouroboros/kernel/mmu.h>
+#include <ouroboros/ikernel/config.h>
+#include <ouroboros/ikernel/eat_self.h>
+#include <ouroboros/ikernel/mmu.h>
 
 #include <ouroboros/stdio.h>
 #include <ouroboros/stdint.h>

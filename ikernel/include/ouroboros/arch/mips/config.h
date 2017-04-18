@@ -1,7 +1,7 @@
 #ifndef KERNEL_ARCH_MIPS_CONFIG_H
 #define KERNEL_ARCH_MIPS_CONFIG_H
 
-#include <ouroboros/kernel/common.h>
+#include <ouroboros/ikernel/common.h>
 
 CPU_LOCAL_DECLARE(unsigned int, _k_num_tlb_entries);
 #define k_num_tlb_entries		CPU_LOCAL_ACCESS(_k_num_tlb_entries)

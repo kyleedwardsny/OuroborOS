@@ -1,6 +1,6 @@
 include(OuCommon)
 
-add_sources(kernel.elf
+add_sources(ikernel.elf
 	config.c
 	entry.S
 	head.S
@@ -9,6 +9,6 @@ add_sources(kernel.elf
 	shadow.c
 )
 
-set_link_script(kernel.elf kernel.ld)
+set_link_script(ikernel.elf kernel.ld)
 
 configure_file(config.ld.in config.ld)
