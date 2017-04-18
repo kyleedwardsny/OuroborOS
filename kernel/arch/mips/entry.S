@@ -258,19 +258,19 @@ _entry_shadow:
 
 	.macro evt name
 	next_evt
-	.global evt_\name
-	.type evt_\name, function
-evt_\name:
+	.global k_evt_\name
+	.type k_evt_\name, function
+k_evt_\name:
 
-	evt_tlb_refill evt_\name
+	evt_tlb_refill k_evt_\name
 _evt_\name\()_tlb_refill:
 	j _entry_\name
 
-	evt_general_exception evt_\name
+	evt_general_exception k_evt_\name
 _evt_\name\()_general_exception:
 	j _entry_\name
 
-	evt_interrupt evt_\name 0
+	evt_interrupt k_evt_\name 0
 _evt_\name\()_interrupt_0:
 	j _entry_\name
 	.endm

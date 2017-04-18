@@ -18,4 +18,15 @@ CPU_LOCAL_DECLARE(unsigned int, _k_entry_policy);
 CPU_LOCAL_DECLARE(unsigned int, _k_available_entry_policies);
 #define k_available_entry_policies	CPU_LOCAL_ACCESS(_k_available_entry_policies)
 
+int k_set_entry_policy(unsigned int entry_policy);
+
+/* EVT entries */
+void k_evt_k0_k1(void);
+void k_evt_k0_rotr(void);
+void k_evt_k1_rotr(void);
+void k_evt_k0_ul(void);
+void k_evt_k1_ul(void);
+void k_evt_ul_rotr(void);
+void k_evt_shadow(void);
+
 #endif /* KERNEL_ARCH_MIPS_CONFIG_H */
