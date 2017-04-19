@@ -11,6 +11,7 @@ add_custom_command(
 		-O binary
 		$<TARGET_FILE:ikernel.elf>
 		"${IKERNEL_BIN}"
+	DEPENDS ikernel.elf
 )
 add_custom_target(ikernel-bin DEPENDS "${IKERNEL_BIN}")
 
