@@ -13,10 +13,10 @@
 
 #include <libfdt.h>
 
-const void *initrd_start;
-const void *initrd_end;
+static void *initrd_start;
+static void *initrd_end;
 
-static int get_pointer(const void *fdt, int node, const char *propname, const void **pointer)
+static int get_pointer(const void *fdt, int node, const char *propname, void **pointer)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	const void *prop;
@@ -34,15 +34,15 @@ static int get_pointer(const void *fdt, int node, const char *propname, const vo
 
 	switch (sizeof(*pointer)) {
 	case 2:
-		*pointer = (const void *) BTON16(*(const ou_uint16_t *) prop);
+		*pointer = (void *) BTON16(*(const ou_uint16_t *) prop);
 		break;
 
 	case 4:
-		*pointer = (const void *) BTON32(*(const ou_uint32_t *) prop);
+		*pointer = (void *) BTON32(*(const ou_uint32_t *) prop);
 		break;
 
 	case 8:
-		*pointer = (const void *) BTON64(*(const ou_uint64_t *) prop);
+		*pointer = (void *) BTON64(*(const ou_uint64_t *) prop);
 		break;
 	}
 
@@ -84,6 +84,32 @@ ret:
 	return retval;
 }
 
+static int initrd_go(void)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	int err;
+	void **header = initrd_start;
+	void *load_addr;
+	void *entry_addr;
+
+	if (initrd_end - initrd_start < sizeof(load_addr) + sizeof(entry_addr)) {
+		retval = -OU_ERR_INVALID_ARGUMENT;
+		goto ret;
+	}
+
+	load_addr = header[0];
+	entry_addr = header[1];
+
+	if ((err = k_enter_initrd(initrd_start, initrd_end, load_addr, entry_addr)) < 0) {
+		retval = err;
+		goto ret;
+	}
+
+	retval = -OU_ERR_SUCCESS;
+ret:
+	return retval;
+}
+
 void k_main(const void *fdt)
 {
 	if (read_fdt(fdt) < 0) {
@@ -93,7 +119,9 @@ void k_main(const void *fdt)
 	k_read_cpu_config();
 	k_clear_tlb();
 
-	/* TODO */
+	if (initrd_go() < 0) {
+		k_hang();
+	}
 }
 
 void k_do_syscall(struct ou_context *context,

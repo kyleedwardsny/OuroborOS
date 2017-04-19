@@ -5,6 +5,8 @@
 
 void k_main(const void *fdt);
 
+int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr);
+
 void k_do_syscall(struct ou_context *context,
 		unsigned long index,
 		unsigned long arg0,

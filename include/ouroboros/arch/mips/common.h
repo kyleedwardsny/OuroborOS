@@ -53,6 +53,9 @@
 #define GPR_30_OFFSET	(GPR_SIZE * 30)
 #define GPR_31_OFFSET	(GPR_SIZE * 31)
 
+#define PAGE_SIZE		(0x1000)
+#define IS_PAGE_ALIGNED(val)	((val & (PAGE_SIZE - 1)) == 0)
+
 #ifndef __ASSEMBLER__
 
 #include <ouroboros/common.h>
