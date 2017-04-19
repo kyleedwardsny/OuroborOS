@@ -16,4 +16,6 @@ void k_do_syscall(struct ou_context *context,
 		unsigned long arg6,
 		unsigned long arg7);
 
+void k_exit(void);
+
 #endif /* OUROBOROS_IKERNEL_MAIN_H */
