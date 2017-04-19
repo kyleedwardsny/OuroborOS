@@ -3,18 +3,16 @@ cmake_minimum_required(VERSION 3.5)
 
 include(OuCommon)
 
-set(KERNEL_LOAD_ADDR 0x80010000)
-
-set(KERNEL_BIN "${CMAKE_CURRENT_BINARY_DIR}/kernel.bin")
+set(IKERNEL_BIN "${CMAKE_CURRENT_BINARY_DIR}/ikernel.bin")
 
 add_custom_command(
-	OUTPUT "${KERNEL_BIN}"
+	OUTPUT "${IKERNEL_BIN}"
 	COMMAND "${CMAKE_OBJCOPY}"
 		-O binary
 		$<TARGET_FILE:ikernel.elf>
-		"${KERNEL_BIN}"
+		"${IKERNEL_BIN}"
 )
-add_custom_target(kernel-bin DEPENDS "${KERNEL_BIN}")
+add_custom_target(ikernel-bin DEPENDS "${IKERNEL_BIN}")
 
 add_sources(ikernel.elf
 	eat_self.c
