@@ -1,4 +1,5 @@
-#include <ouroboros/arch/mips/config.h>
+#include <ouroboros/arch/mips/ikernel/config.h>
+#include <ouroboros/arch/mips/ikernel/entry.h>
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/entry.h>
 #include <ouroboros/errno.h>
@@ -11,6 +12,7 @@ CPU_LOCAL_DEFINE(unsigned int, _k_num_shadow_sets);
 CPU_LOCAL_DEFINE(int, _k_user_local_present);
 CPU_LOCAL_DEFINE(unsigned int, _k_entry_policy);
 CPU_LOCAL_DEFINE(unsigned int, _k_available_entry_policies);
+CPU_LOCAL_DEFINE(k_exit_fn, _k_exit_policy);
 
 void k_read_cpu_config(void)
 {
@@ -66,6 +68,16 @@ static const evt_fn evts[] = {
 	[ENTRY_POLICY_SHADOW] = k_evt_shadow,
 };
 
+static const k_exit_fn exit_fns[] = {
+	[ENTRY_POLICY_K0_K1] = k_exit_k0_k1,
+	[ENTRY_POLICY_K0_ROTR] = k_exit_k0_rotr,
+	[ENTRY_POLICY_K1_ROTR] = k_exit_k1_rotr,
+	[ENTRY_POLICY_K0_UL] = k_exit_k0_ul,
+	[ENTRY_POLICY_K1_UL] = k_exit_k1_ul,
+	[ENTRY_POLICY_UL_ROTR] = k_exit_ul_rotr,
+	[ENTRY_POLICY_SHADOW] = k_exit_shadow,
+};
+
 int k_set_entry_policy(unsigned int entry_policy)
 {
 	int retval = -OU_ERR_UNKNOWN;
@@ -77,6 +89,7 @@ int k_set_entry_policy(unsigned int entry_policy)
 	}
 
 	k_entry_policy = entry_policy;
+	k_exit_policy = exit_fns[entry_policy];
 
 	MTC0(MIPS_CP0_EBASE_EB_EB((ou_size_t) evts[entry_policy]), MIPS_CP0_EBASE);
 

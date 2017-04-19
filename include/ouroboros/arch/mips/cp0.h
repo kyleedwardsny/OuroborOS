@@ -297,8 +297,64 @@ do {					\
 /* Interrupt pending */
 #define MIPS_CP0_CAUSE_IP1			(0x00000200)
 #define MIPS_CP0_CAUSE_IP0			(0x00000100)
+
 /* Exception code */
 #define MIPS_CP0_CAUSE_EXC			(0x0000007C)
+
+/* Interrupt */
+#define MIPS_CP0_CAUSE_EXC_INT			(0x00 << 2)
+/* TLB modification exception */
+#define MIPS_CP0_CAUSE_EXC_MOD			(0x01 << 2)
+/* TLB exception (load or instruction fetch) */
+#define MIPS_CP0_CAUSE_EXC_TLBL			(0x02 << 2)
+/* TLB exception (store) */
+#define MIPS_CP0_CAUSE_EXC_TLBS			(0x03 << 2)
+/* Address error exception (load or instruction fetch) */
+#define MIPS_CP0_CAUSE_EXC_ADEL			(0x04 << 2)
+/* Address error exception (store) */
+#define MIPS_CP0_CAUSE_EXC_ADES			(0x05 << 2)
+/* Bus error exception (instruction fetch) */
+#define MIPS_CP0_CAUSE_EXC_IBE			(0x06 << 2)
+/* Bus error exception (data load or store) */
+#define MIPS_CP0_CAUSE_EXC_DBE			(0x07 << 2)
+/* Syscall exception */
+#define MIPS_CP0_CAUSE_EXC_SYS			(0x08 << 2)
+/* Breakpoint exception */
+#define MIPS_CP0_CAUSE_EXC_BP			(0x09 << 2)
+/* Reserved instruction exception */
+#define MIPS_CP0_CAUSE_EXC_RI			(0x0A << 2)
+/* Coprocessor unusable exception */
+#define MIPS_CP0_CAUSE_EXC_CPU			(0x0B << 2)
+/* Arithmetic overflow exception */
+#define MIPS_CP0_CAUSE_EXC_OV			(0x0C << 2)
+/* Trap exception */
+#define MIPS_CP0_CAUSE_EXC_TR			(0x0D << 2)
+/* MSA floating point exception */
+#define MIPS_CP0_CAUSE_EXC_MSAFPE		(0x0E << 2)
+/* Floating point exception */
+#define MIPS_CP0_CAUSE_EXC_FPE			(0x0F << 2)
+/* Coprocessor 2 exception */
+#define MIPS_CP0_CAUSE_EXC_C2E			(0x12 << 2)
+/* TLB read-inhibit exception */
+#define MIPS_CP0_CAUSE_EXC_TLBRI		(0x13 << 2)
+/* TLB execution-inhibit exception */
+#define MIPS_CP0_CAUSE_EXC_TLBXI		(0x14 << 2)
+/* MSA disabled exception */
+#define MIPS_CP0_CAUSE_EXC_MSADIS		(0x15 << 2)
+/* MDMX unusable exception */
+#define MIPS_CP0_CAUSE_EXC_MDMX			(0x16 << 2)
+/* Reference to WatchHi/WatchLo address */
+#define MIPS_CP0_CAUSE_EXC_WATCH		(0x17 << 2)
+/* Machine check */
+#define MIPS_CP0_CAUSE_EXC_MCHECK		(0x18 << 2)
+/* Thread allocation, deallocation, or scheduling exceptions */
+#define MIPS_CP0_CAUSE_EXC_THREAD		(0x19 << 2)
+/* DSP module state disabled exception */
+#define MIPS_CP0_CAUSE_EXC_DSPDIS		(0x1A << 2)
+/* Virtualized guest exception */
+#define MIPS_CP0_CAUSE_EXC_GE			(0x1B << 2)
+/* Cache error */
+#define MIPS_CP0_CAUSE_EXC_CACHEERR		(0x1E << 2)
 
 /* Exception Program Counter */
 #define MIPS_CP0_EPC				$14, 0

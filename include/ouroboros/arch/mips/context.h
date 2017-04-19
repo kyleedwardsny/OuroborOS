@@ -3,7 +3,7 @@
 
 #include <ouroboros/arch/mips/common.h>
 
-#define OU_FLAGS_IE	(0x1 << 0)
+#define OU_CONTEXT_FLAGS_IE	(0x1 << 0)
 
 struct ou_context {
 	struct mips_regstore registers;

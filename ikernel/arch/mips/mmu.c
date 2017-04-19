@@ -2,7 +2,7 @@
 
 #include <ouroboros/ikernel/config.h>
 
-#include <ouroboros/arch/mips/config.h>
+#include <ouroboros/arch/mips/ikernel/config.h>
 #include <ouroboros/arch/mips/cp0.h>
 
 #include <ouroboros/common.h>

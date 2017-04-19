@@ -1,5 +1,5 @@
-#ifndef KERNEL_ARCH_MIPS_CONFIG_H
-#define KERNEL_ARCH_MIPS_CONFIG_H
+#ifndef OUROBOROS_ARCH_MIPS_IKERNEL_CONFIG_H
+#define OUROBOROS_ARCH_MIPS_IKERNEL_CONFIG_H
 
 #include <ouroboros/ikernel/common.h>
 
@@ -18,6 +18,11 @@ CPU_LOCAL_DECLARE(unsigned int, _k_entry_policy);
 CPU_LOCAL_DECLARE(unsigned int, _k_available_entry_policies);
 #define k_available_entry_policies	CPU_LOCAL_ACCESS(_k_available_entry_policies)
 
+typedef void (*k_exit_fn)(void);
+
+CPU_LOCAL_DECLARE(k_exit_fn, _k_exit_policy);
+#define k_exit_policy			CPU_LOCAL_ACCESS(_k_exit_policy)
+
 int k_set_entry_policy(unsigned int entry_policy);
 
 /* EVT entries */
@@ -29,4 +34,4 @@ void k_evt_k1_ul(void);
 void k_evt_ul_rotr(void);
 void k_evt_shadow(void);
 
-#endif /* KERNEL_ARCH_MIPS_CONFIG_H */
+#endif /* OUROBOROS_ARCH_MIPS_IKERNEL_CONFIG_H */

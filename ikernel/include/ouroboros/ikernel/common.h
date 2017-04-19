@@ -1,5 +1,5 @@
-#ifndef OUROBOROS_KERNEL_COMMON_H
-#define OUROBOROS_KERNEL_COMMON_H
+#ifndef OUROBOROS_IKERNEL_COMMON_H
+#define OUROBOROS_IKERNEL_COMMON_H
 
 #include <ouroboros/genconfig.h>
 #include <ouroboros/arch/current/common.h>
@@ -16,4 +16,4 @@
 #define CPU_LOCAL_ACCESS(name)				\
 	((CPU_LOCAL_NAME(name))[k_get_current_cpu()])
 
-#endif /* OUROBOROS_KERNEL_COMMON_H */
+#endif /* OUROBOROS_IKERNEL_COMMON_H */

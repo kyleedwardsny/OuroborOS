@@ -1,13 +1,7 @@
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/common.h>
 #include <ouroboros/genconfig.h>
-
-	.section .bss.regstore
-
-	.global k_regstore
-	.type k_regstore, object
-k_regstore:
-	.fill OU_MAX_CORES * 32, GPR_SIZE
+#include <ouroboros/arch/mips/ikernel/entry.h>
 
 	.section .text
 
@@ -86,7 +80,7 @@ k_regstore:
 	andi \kreg_clobber, MIPS_CP0_EBASE_CPUNUM
 	sll \kreg_clobber, REGSTORE_CORE_SHIFT
 
-	la \kreg_addr, k_regstore
+	la \kreg_addr, CPU_LOCAL_NAME(_k_regstore)
 	add \kreg_addr, \kreg_clobber
 	.endm
 
@@ -117,6 +111,9 @@ _entry_k0_k1:
 	get_sp
 	bal k_entry
 
+	.global k_exit_k0_k1
+	.type k_exit_k0_k1, function
+k_exit_k0_k1:
 	get_ebase_2 $k0, $k1
 	load_regs $k0
 	/* For security, don't leak this info */
@@ -134,6 +131,9 @@ _entry_k0_rotr:
 	get_sp
 	bal k_entry
 
+	.global k_exit_k0_rotr
+	.type k_exit_k0_rotr, function
+k_exit_k0_rotr:
 	get_ebase_2 $k0, $k1
 	load_regs $k0
 	GPR_LOAD $k1, GPR_27_OFFSET($k0)
@@ -151,6 +151,9 @@ _entry_k1_rotr:
 	get_sp
 	bal k_entry
 
+	.global k_exit_k1_rotr
+	.type k_exit_k1_rotr, function
+k_exit_k1_rotr:
 	get_ebase_2 $k1, $k0
 	load_regs $k1
 	GPR_LOAD $k0, GPR_26_OFFSET($k1)
@@ -173,6 +176,9 @@ _entry_k0_ul:
 	get_sp
 	bal k_entry
 
+	.global k_exit_k0_ul
+	.type k_exit_k0_ul, function
+k_exit_k0_ul:
 	get_ebase_2 $k0, $k1
 	load_regs $k0
 	GPR_LOAD $k1, GPR_27_OFFSET($k0) /* This MUST be done before $k0 */
@@ -195,6 +201,9 @@ _entry_k1_ul:
 	get_sp
 	bal k_entry
 
+	.global k_exit_k1_ul
+	.type k_exit_k1_ul, function
+k_exit_k1_ul:
 	get_ebase_2 $k1, $k0
 	load_regs $k1
 	GPR_LOAD $k0, GPR_26_OFFSET($k1)
@@ -218,6 +227,9 @@ _entry_ul_rotr:
 	get_sp
 	bal k_entry
 
+	.global k_exit_ul_rotr
+	.type k_exit_ul_rotr, function
+k_exit_ul_rotr:
 	get_ebase_2 $k0, $k1
 	load_regs $k0
 	GPR_LOAD $k1, GPR_27_OFFSET($k0)
@@ -227,9 +239,11 @@ _entry_ul_rotr:
 
 _entry_shadow:
 	get_sp
+	bal k_entry
 
-	/* TODO Do kernel stuff */
-
+	.global k_exit_shadow
+	.type k_exit_shadow, function
+k_exit_shadow:
 	eret
 
 	.section .text.evt

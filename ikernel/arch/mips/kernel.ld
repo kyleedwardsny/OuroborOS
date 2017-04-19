@@ -40,13 +40,13 @@ SECTIONS
 	}
 
 	. = ALIGN(_max_cores_aligned * 32 * 4);
+	_regstore_begin = ABSOLUTE(.);
 
 	.bss.regstore :
 	{
 		*(.bss.regstore)
 	}
 
-	_regstore_begin = ABSOLUTE(k_regstore);
 	_regstore_upper = _regstore_begin >> 16;
 	_regstore_lower = _regstore_begin & 0xFFFF;
 
