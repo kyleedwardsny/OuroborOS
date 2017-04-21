@@ -2,12 +2,13 @@
 #define OUROBOROS_ARCH_MIPS_IKERNEL_ENTRY_H
 
 #include <ouroboros/ikernel/common.h>
+#include <ouroboros/arch/mips/context.h>
 
-#define k_regstore	CPU_LOCAL_ACCESS(_k_regstore)
+#define k_context	CPU_LOCAL_ACCESS(_k_context)
 
 #ifndef __ASSEMBLER__
 
-CPU_LOCAL_DECLARE(struct mips_regstore, _k_regstore);
+CPU_LOCAL_DECLARE(struct ou_context, _k_context);
 
 void k_exit_k0_k1(void);
 

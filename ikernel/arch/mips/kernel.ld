@@ -39,16 +39,16 @@ SECTIONS
 		. = ALIGN(32);
 	}
 
-	. = ALIGN(_max_cores_aligned * 32 * 4);
-	_regstore_begin = ABSOLUTE(.);
+	. = ALIGN(_max_cores_aligned * 64 * 4);
+	_context_begin = ABSOLUTE(.);
 
-	.bss.regstore :
+	.bss.ctx :
 	{
-		*(.bss.regstore)
+		*(.bss.ctx)
 	}
 
-	_regstore_upper = _regstore_begin >> 16;
-	_regstore_lower = _regstore_begin & 0xFFFF;
+	_context_upper = _context_begin >> 16;
+	_context_lower = _context_begin & 0xFFFF;
 
 	. = ALIGN(32);
 	_bss_end = .;

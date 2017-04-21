@@ -1,75 +1,94 @@
-#include <ouroboros/arch/mips/shadow.h>
+#include <ouroboros/arch/mips/ikernel/shadow.h>
+#include <ouroboros/arch/mips/asm.h>
 
-void k_read_current_pss(struct mips_regstore *regstore)
+void k_read_current_pss(struct ou_context *context)
 {
+#define RDPGPR_CONTEXT(n)				\
+do {							\
+	if (context->mask_regs & CTX_MASK_REG_GPR(n)) {	\
+		RDPGPR(context->gpr.by_index[n], $##n);	\
+	}						\
+} while (0)
+
 	__asm__(".set noat");
-	RDPGPR(regstore->gpr_1.ptr, $1);
+	RDPGPR_CONTEXT(1);
 	__asm__(".set at");
-	RDPGPR(regstore->gpr_2.ptr, $2);
-	RDPGPR(regstore->gpr_3.ptr, $3);
-	RDPGPR(regstore->gpr_4.ptr, $4);
-	RDPGPR(regstore->gpr_5.ptr, $5);
-	RDPGPR(regstore->gpr_6.ptr, $6);
-	RDPGPR(regstore->gpr_7.ptr, $7);
-	RDPGPR(regstore->gpr_8.ptr, $8);
-	RDPGPR(regstore->gpr_9.ptr, $9);
-	RDPGPR(regstore->gpr_10.ptr, $10);
-	RDPGPR(regstore->gpr_11.ptr, $11);
-	RDPGPR(regstore->gpr_12.ptr, $12);
-	RDPGPR(regstore->gpr_13.ptr, $13);
-	RDPGPR(regstore->gpr_14.ptr, $14);
-	RDPGPR(regstore->gpr_15.ptr, $15);
-	RDPGPR(regstore->gpr_16.ptr, $16);
-	RDPGPR(regstore->gpr_17.ptr, $17);
-	RDPGPR(regstore->gpr_18.ptr, $18);
-	RDPGPR(regstore->gpr_19.ptr, $19);
-	RDPGPR(regstore->gpr_20.ptr, $20);
-	RDPGPR(regstore->gpr_21.ptr, $21);
-	RDPGPR(regstore->gpr_22.ptr, $22);
-	RDPGPR(regstore->gpr_23.ptr, $23);
-	RDPGPR(regstore->gpr_24.ptr, $24);
-	RDPGPR(regstore->gpr_25.ptr, $25);
-	RDPGPR(regstore->gpr_26.ptr, $26);
-	RDPGPR(regstore->gpr_27.ptr, $27);
-	RDPGPR(regstore->gpr_28.ptr, $28);
-	RDPGPR(regstore->gpr_29.ptr, $29);
-	RDPGPR(regstore->gpr_30.ptr, $30);
-	RDPGPR(regstore->gpr_31.ptr, $31);
+	RDPGPR_CONTEXT(2);
+	RDPGPR_CONTEXT(3);
+	RDPGPR_CONTEXT(4);
+	RDPGPR_CONTEXT(5);
+	RDPGPR_CONTEXT(6);
+	RDPGPR_CONTEXT(7);
+	RDPGPR_CONTEXT(8);
+	RDPGPR_CONTEXT(9);
+	RDPGPR_CONTEXT(10);
+	RDPGPR_CONTEXT(11);
+	RDPGPR_CONTEXT(12);
+	RDPGPR_CONTEXT(13);
+	RDPGPR_CONTEXT(14);
+	RDPGPR_CONTEXT(15);
+	RDPGPR_CONTEXT(16);
+	RDPGPR_CONTEXT(17);
+	RDPGPR_CONTEXT(18);
+	RDPGPR_CONTEXT(19);
+	RDPGPR_CONTEXT(20);
+	RDPGPR_CONTEXT(21);
+	RDPGPR_CONTEXT(22);
+	RDPGPR_CONTEXT(23);
+	RDPGPR_CONTEXT(24);
+	RDPGPR_CONTEXT(25);
+	RDPGPR_CONTEXT(26);
+	RDPGPR_CONTEXT(27);
+	RDPGPR_CONTEXT(28);
+	RDPGPR_CONTEXT(29);
+	RDPGPR_CONTEXT(30);
+	RDPGPR_CONTEXT(31);
+
+#undef RDPGPR_CONTEXT
 }
 
-void k_write_current_pss(const struct mips_regstore *regstore)
+void k_write_current_pss(const struct ou_context *context)
 {
+#define WRPGPR_CONTEXT(n)				\
+do {							\
+	if (context->mask_regs & CTX_MASK_REG_GPR(n)) {	\
+		WRPGPR(context->gpr.by_index[n], $##n);	\
+	}						\
+} while (0)
+
 	__asm__(".set noat");
-	WRPGPR(regstore->gpr_1.ptr, $1);
+	WRPGPR_CONTEXT(1);
 	__asm__(".set at");
-	WRPGPR(regstore->gpr_2.ptr, $2);
-	WRPGPR(regstore->gpr_3.ptr, $3);
-	WRPGPR(regstore->gpr_4.ptr, $4);
-	WRPGPR(regstore->gpr_5.ptr, $5);
-	WRPGPR(regstore->gpr_6.ptr, $6);
-	WRPGPR(regstore->gpr_7.ptr, $7);
-	WRPGPR(regstore->gpr_8.ptr, $8);
-	WRPGPR(regstore->gpr_9.ptr, $9);
-	WRPGPR(regstore->gpr_10.ptr, $10);
-	WRPGPR(regstore->gpr_11.ptr, $11);
-	WRPGPR(regstore->gpr_12.ptr, $12);
-	WRPGPR(regstore->gpr_13.ptr, $13);
-	WRPGPR(regstore->gpr_14.ptr, $14);
-	WRPGPR(regstore->gpr_15.ptr, $15);
-	WRPGPR(regstore->gpr_16.ptr, $16);
-	WRPGPR(regstore->gpr_17.ptr, $17);
-	WRPGPR(regstore->gpr_18.ptr, $18);
-	WRPGPR(regstore->gpr_19.ptr, $19);
-	WRPGPR(regstore->gpr_20.ptr, $20);
-	WRPGPR(regstore->gpr_21.ptr, $21);
-	WRPGPR(regstore->gpr_22.ptr, $22);
-	WRPGPR(regstore->gpr_23.ptr, $23);
-	WRPGPR(regstore->gpr_24.ptr, $24);
-	WRPGPR(regstore->gpr_25.ptr, $25);
-	WRPGPR(regstore->gpr_26.ptr, $26);
-	WRPGPR(regstore->gpr_27.ptr, $27);
-	WRPGPR(regstore->gpr_28.ptr, $28);
-	WRPGPR(regstore->gpr_29.ptr, $29);
-	WRPGPR(regstore->gpr_30.ptr, $30);
-	WRPGPR(regstore->gpr_31.ptr, $31);
+	WRPGPR_CONTEXT(2);
+	WRPGPR_CONTEXT(3);
+	WRPGPR_CONTEXT(4);
+	WRPGPR_CONTEXT(5);
+	WRPGPR_CONTEXT(6);
+	WRPGPR_CONTEXT(7);
+	WRPGPR_CONTEXT(8);
+	WRPGPR_CONTEXT(9);
+	WRPGPR_CONTEXT(10);
+	WRPGPR_CONTEXT(11);
+	WRPGPR_CONTEXT(12);
+	WRPGPR_CONTEXT(13);
+	WRPGPR_CONTEXT(14);
+	WRPGPR_CONTEXT(15);
+	WRPGPR_CONTEXT(16);
+	WRPGPR_CONTEXT(17);
+	WRPGPR_CONTEXT(18);
+	WRPGPR_CONTEXT(19);
+	WRPGPR_CONTEXT(20);
+	WRPGPR_CONTEXT(21);
+	WRPGPR_CONTEXT(22);
+	WRPGPR_CONTEXT(23);
+	WRPGPR_CONTEXT(24);
+	WRPGPR_CONTEXT(25);
+	WRPGPR_CONTEXT(26);
+	WRPGPR_CONTEXT(27);
+	WRPGPR_CONTEXT(28);
+	WRPGPR_CONTEXT(29);
+	WRPGPR_CONTEXT(30);
+	WRPGPR_CONTEXT(31);
+
+#undef WRPGPR_CONTEXT
 }

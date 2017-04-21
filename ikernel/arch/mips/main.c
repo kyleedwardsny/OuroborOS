@@ -10,7 +10,7 @@
 #include <ouroboros/stdint.h>
 #include <ouroboros/string.h>
 
-CPU_LOCAL_DEFINE(struct mips_regstore, _k_regstore) __attribute__((section(".bss.regstore")));
+CPU_LOCAL_DEFINE(struct ou_context, _k_context) __attribute__((section(".bss.ctx")));
 
 void k_main_args(unsigned long arg0, unsigned long arg1, unsigned long arg2)
 {
@@ -29,24 +29,21 @@ void k_main_args(unsigned long arg0, unsigned long arg1, unsigned long arg2)
 void k_entry(void)
 {
 	ou_uint32_t cause;
-	struct ou_context context;
-
-	ou_memcpy(&context.registers, &k_regstore, sizeof(context.registers));
 
 	MFC0(cause, MIPS_CP0_CAUSE);
 
 	switch (cause & MIPS_CP0_CAUSE_EXC) {
 	case MIPS_CP0_CAUSE_EXC_SYS:
-		k_do_syscall(&context,
-				context.registers.gpr_2.u,	/* $v0 = index */
-				context.registers.gpr_4.u,	/* $a0 = argument 0 */
-				context.registers.gpr_5.u,	/* $a1 = argument 1 */
-				context.registers.gpr_6.u,	/* $a2 = argument 2 */
-				context.registers.gpr_7.u,	/* $a3 = argument 3 */
-				context.registers.gpr_16.u,	/* $s0 = argument 4 */
-				context.registers.gpr_17.u,	/* $s1 = argument 4 */
-				context.registers.gpr_18.u,	/* $s2 = argument 4 */
-				context.registers.gpr_19.u);	/* $s3 = argument 4 */
+		k_do_syscall(&k_context,
+				k_context.gpr.by_name.v0.u,
+				k_context.gpr.by_name.a0.u,
+				k_context.gpr.by_name.a1.u,
+				k_context.gpr.by_name.a2.u,
+				k_context.gpr.by_name.a3.u,
+				k_context.gpr.by_name.s0.u,
+				k_context.gpr.by_name.s1.u,
+				k_context.gpr.by_name.s2.u,
+				k_context.gpr.by_name.s3.u);
 		break;
 	}
 }
@@ -63,7 +60,6 @@ int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr)
 	ou_uint32_t index;
 	ou_uint32_t entry_lo;
 	ou_uint32_t entry_ho;
-	struct ou_context_mask context_mask;
 	struct ou_context context;
 	ou_size_t i;
 
@@ -88,16 +84,16 @@ int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr)
 
 	TLBWI();
 
-	context_mask.flags0 = MIPS_CONTEXT_MASK_0_ASID | MIPS_CONTEXT_MASK_0_HI | MIPS_CONTEXT_MASK_0_LO;
-	context_mask.reg_mask = BITS(31, 0);
+	context.mask_0 = CTX_MASK_0_PC | CTX_MASK_0_HI | CTX_MASK_0_LO | CTX_MASK_0_PC;
+	context.mask_regs = BITS(31, 1);
 
-	context.registers.pc = entry_addr;
-	for (i = 1; i < 31; i++) {
-		mips_regstore_by_index(&context.registers, i).u = 0;
+	context.pc = entry_addr;
+	for (i = 1; i < 32; i++) {
+		context.gpr.by_index[i].u = 0;
 	}
 	context.asid = 1;
 
-	k_load_new_context(&context_mask, &context);
+	k_load_new_context(&context);
 
 	k_exit();
 

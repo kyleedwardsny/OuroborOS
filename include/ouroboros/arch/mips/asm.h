@@ -55,4 +55,14 @@ do {									\
 	__asm__ volatile("mflo %[mips_reg]" : [mips_reg] "=r" (var) :);	\
 } while (0)
 
+#define RDPGPR(var, reg)									\
+do {												\
+	__asm__ volatile("rdpgpr %[mips_reg], " CPP_STR(reg) : [mips_reg] "=r" (var) :);	\
+} while (0)
+
+#define WRPGPR(expr, reg)										\
+do {													\
+	__asm__ volatile("wrpgpr %[mips_reg], " CPP_STR(reg) : : [mips_reg] "r" (expr) :);	\
+} while (0)
+
 #endif /* OUROBOROS_ARCH_MIPS_ASM_H */
