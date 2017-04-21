@@ -5,6 +5,20 @@
 
 	.section .text
 
+	.macro store_hi_lo kreg
+	mfhi $t0
+	GPR_STORE $t0, HI_OFFSET(\kreg)
+	mflo $t0
+	GPR_STORE $t0, LO_OFFSET(\kreg)
+	.endm
+
+	.macro load_hi_lo kreg
+	GPR_LOAD $t0, HI_OFFSET(\kreg)
+	mthi $t0
+	GPR_LOAD $t0, LO_OFFSET(\kreg)
+	mtlo $t0
+	.endm
+
 	.macro store_regs kreg
 	.set noat
 	GPR_STORE $1, GPR_1_OFFSET(\kreg)
@@ -38,9 +52,13 @@
 	GPR_STORE $29, GPR_29_OFFSET(\kreg)
 	GPR_STORE $30, GPR_30_OFFSET(\kreg)
 	GPR_STORE $31, GPR_31_OFFSET(\kreg)
+
+	store_hi_lo \kreg
 	.endm
 
 	.macro load_regs kreg
+	load_hi_lo \kreg
+
 	.set noat
 	GPR_LOAD $1, GPR_1_OFFSET(\kreg)
 	.set at

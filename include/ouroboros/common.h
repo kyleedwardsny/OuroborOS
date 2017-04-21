@@ -62,4 +62,7 @@
 
 #define ARRAY_SIZE(arr)		(sizeof(arr) / sizeof(*(arr)))
 
+#define CPP_STR(s)	CPP_XSTR(s)
+#define CPP_XSTR(s)	#s
+
 #endif /* OUROBOROS_COMMON_H */

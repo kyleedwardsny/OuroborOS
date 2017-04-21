@@ -4,6 +4,7 @@
 #include <ouroboros/arch/mips/ikernel/config.h>
 #include <ouroboros/arch/mips/ikernel/entry.h>
 #include <ouroboros/arch/mips/cp0.h>
+#include <ouroboros/arch/mips/context.h>
 
 #include <ouroboros/errno.h>
 #include <ouroboros/stdint.h>
@@ -59,9 +60,12 @@ int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	ou_size_t length = end - start;
-	uint32_t index;
-	uint32_t entry_lo;
-	uint32_t entry_ho;
+	ou_uint32_t index;
+	ou_uint32_t entry_lo;
+	ou_uint32_t entry_ho;
+	struct ou_context_mask context_mask;
+	struct ou_context context;
+	ou_size_t i;
 
 	if (!IS_PAGE_ALIGNED((ou_size_t) start) || !IS_PAGE_ALIGNED((ou_size_t) load_addr)) {
 		retval = -OU_ERR_INVALID_ARGUMENT;
@@ -84,39 +88,16 @@ int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr)
 
 	TLBWI();
 
-	k_regstore.gpr_1.u = 0;
-	k_regstore.gpr_2.u = 0;
-	k_regstore.gpr_3.u = 0;
-	k_regstore.gpr_4.u = length;
-	k_regstore.gpr_5.u = 0;
-	k_regstore.gpr_6.u = 0;
-	k_regstore.gpr_7.u = 0;
-	k_regstore.gpr_8.u = 0;
-	k_regstore.gpr_9.u = 0;
-	k_regstore.gpr_10.u = 0;
-	k_regstore.gpr_11.u = 0;
-	k_regstore.gpr_12.u = 0;
-	k_regstore.gpr_13.u = 0;
-	k_regstore.gpr_14.u = 0;
-	k_regstore.gpr_15.u = 0;
-	k_regstore.gpr_16.u = 0;
-	k_regstore.gpr_17.u = 0;
-	k_regstore.gpr_18.u = 0;
-	k_regstore.gpr_19.u = 0;
-	k_regstore.gpr_20.u = 0;
-	k_regstore.gpr_21.u = 0;
-	k_regstore.gpr_22.u = 0;
-	k_regstore.gpr_23.u = 0;
-	k_regstore.gpr_24.u = 0;
-	k_regstore.gpr_25.u = 0;
-	k_regstore.gpr_26.u = 0;
-	k_regstore.gpr_27.u = 0;
-	k_regstore.gpr_28.u = 0;
-	k_regstore.gpr_29.u = 0;
-	k_regstore.gpr_30.u = 0;
-	k_regstore.gpr_31.u = 0;
+	context_mask.flags0 = MIPS_CONTEXT_MASK_0_ASID | MIPS_CONTEXT_MASK_0_HI | MIPS_CONTEXT_MASK_0_LO;
+	context_mask.reg_mask = BITS(31, 0);
 
-	MTC0(entry_addr, MIPS_CP0_EPC);
+	context.registers.pc = entry_addr;
+	for (i = 1; i < 31; i++) {
+		mips_regstore_by_index(&context.registers, i).u = 0;
+	}
+	context.asid = 1;
+
+	k_load_new_context(&context_mask, &context);
 
 	k_exit();
 

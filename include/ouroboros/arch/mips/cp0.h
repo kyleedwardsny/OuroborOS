@@ -12,39 +12,6 @@ struct mips_tlb_entry {
 	ou_uint32_t page_mask;
 };
 
-#define mips_cp_xstr(r, s)	mips_cp_str(r, s)
-#define mips_cp_str(r, s)	#r "," #s
-
-#define MTC0(expr, reg)										\
-do {												\
-	__asm__ volatile("mtc0 %[mips_reg], " mips_cp_xstr(reg) : : [mips_reg] "r" (expr));	\
-} while (0)
-
-#define MFC0(var, reg)										\
-do {												\
-	__asm__ volatile("mfc0 %[mips_reg], " mips_cp_xstr(reg) : [mips_reg] "=r" (var) :);	\
-} while (0)
-
-#define TLBR()				\
-do {					\
-	__asm__ volatile("tlbr" : :);	\
-} while (0)
-
-#define TLBWI()				\
-do {					\
-	__asm__ volatile("tlbwi" : :);	\
-} while (0)
-
-#define TLBWR()				\
-do {					\
-	__asm__ volatile("tlbwr" : :);	\
-} while (0)
-
-#define TLBP()				\
-do {					\
-	__asm__ volatile("tlbp" : :);	\
-} while (0)
-
 #endif /* __ASSEMBLER__ */
 
 /* Cache coherency attributes */

@@ -3,6 +3,7 @@
 
 #include <ouroboros/common.h>
 
+#include <ouroboros/arch/mips/asm.h>
 #include <ouroboros/arch/mips/cp0.h>
 
 #define STACK_SIZE_LOG		(10)
@@ -11,7 +12,7 @@
 /* TODO mips64 */
 #define GPR_SIZE_LOG		(2)
 #define GPR_SIZE		(1 << GPR_SIZE_LOG)
-#define REGSTORE_SIZE_LOG	(5 + GPR_SIZE_LOG)
+#define REGSTORE_SIZE_LOG	(6 + GPR_SIZE_LOG)
 #define REGSTORE_SIZE		(1 << REGSTORE_SIZE_LOG)
 #define REGSTORE_CORE_SHIFT	(REGSTORE_SIZE_LOG)
 #define GPR_STORE		sw
@@ -21,6 +22,7 @@
 #error "Incorrect REGSTORE_CORE_SHIFT value"
 #endif
 
+#define PC_OFFSET	(GPR_SIZE * 0)
 #define GPR_1_OFFSET	(GPR_SIZE * 1)
 #define GPR_2_OFFSET	(GPR_SIZE * 2)
 #define GPR_3_OFFSET	(GPR_SIZE * 3)
@@ -53,6 +55,9 @@
 #define GPR_30_OFFSET	(GPR_SIZE * 30)
 #define GPR_31_OFFSET	(GPR_SIZE * 31)
 
+#define HI_OFFSET	(GPR_SIZE * 32)
+#define LO_OFFSET	(GPR_SIZE * 33)
+
 #define PAGE_SIZE		(0x1000)
 #define IS_PAGE_ALIGNED(val)	((val & (PAGE_SIZE - 1)) == 0)
 
@@ -71,8 +76,9 @@ typedef union {
 	gpr_s_t s;
 } gpr_t;
 
-PACKED_STRUCT_BEGIN(mips_regstore) {
-	gpr_t _reserved;
+struct mips_regstore {
+	unsigned long pc;
+
 	gpr_t gpr_1;
 	gpr_t gpr_2;
 	gpr_t gpr_3;
@@ -104,15 +110,15 @@ PACKED_STRUCT_BEGIN(mips_regstore) {
 	gpr_t gpr_29;
 	gpr_t gpr_30;
 	gpr_t gpr_31;
-} PACKED_STRUCT_END;
 
-static inline unsigned int k_get_current_cpu()
-{
-	gpr_u_t ebase;
+	unsigned long hi;
+	unsigned long lo;
 
-	MFC0(ebase, MIPS_CP0_EBASE);
-	return (ebase & MIPS_CP0_EBASE_CPUNUM) >> 0;
-}
+	unsigned long _reserved[30];
+};
+
+#define mips_regstore_by_index(regstore, index)	\
+	(((gpr_t *) (regstore))[index])
 
 #endif /* __ASSEMBLER__ */
 

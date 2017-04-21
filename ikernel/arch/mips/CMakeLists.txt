@@ -2,6 +2,7 @@ include(OuCommon)
 
 add_sources(ikernel.elf
 	config.c
+	context.c
 	entry.S
 	head.S
 	hang.c
