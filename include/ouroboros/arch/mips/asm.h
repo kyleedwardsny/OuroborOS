@@ -5,15 +5,19 @@
 
 #define MIPS_CP_STR(r, s)	CPP_STR(r) ", " CPP_STR(s)
 
-#define MTC0(expr, reg)										\
-do {												\
-	__asm__ volatile("mtc0 %[mips_reg], " MIPS_CP_STR(reg) : : [mips_reg] "r" (expr));	\
+#define MTC0_R(expr, reg, select)									\
+do {													\
+	__asm__ volatile("mtc0 %[mips_reg], " MIPS_CP_STR(reg, select) : : [mips_reg] "r" (expr));	\
 } while (0)
 
-#define MFC0(var, reg)										\
-do {												\
-	__asm__ volatile("mfc0 %[mips_reg], " MIPS_CP_STR(reg) : [mips_reg] "=r" (var) :);	\
+#define MTC0(expr, reg)		MTC0_R(expr, reg)
+
+#define MFC0_R(var, reg, select)									\
+do {													\
+	__asm__ volatile("mfc0 %[mips_reg], " MIPS_CP_STR(reg, select) : [mips_reg] "=r" (var) :);	\
 } while (0)
+
+#define MFC0(var, reg)		MFC0_R(var, reg)
 
 #define TLBR()				\
 do {					\
