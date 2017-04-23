@@ -5,19 +5,27 @@
 
 #define MIPS_CP_STR(r, s)	CPP_STR(r) ", " CPP_STR(s)
 
-#define MTC0_R(expr, reg, select)									\
-do {													\
-	__asm__ volatile("mtc0 %[mips_reg], " MIPS_CP_STR(reg, select) : : [mips_reg] "r" (expr));	\
+#define MTC0_OP(op, expr, reg, select)										\
+do {														\
+	__asm__ volatile(CPP_STR(op) " %[mips_reg], " MIPS_CP_STR(reg, select) : : [mips_reg] "r" (expr));	\
 } while (0)
 
-#define MTC0(expr, reg)		MTC0_R(expr, reg)
-
-#define MFC0_R(var, reg, select)									\
-do {													\
-	__asm__ volatile("mfc0 %[mips_reg], " MIPS_CP_STR(reg, select) : [mips_reg] "=r" (var) :);	\
+#define MFC0_OP(op, var, reg, select)										\
+do {														\
+	__asm__ volatile(CPP_STR(op) " %[mips_reg], " MIPS_CP_STR(reg, select) : [mips_reg] "=r" (var) :);	\
 } while (0)
 
-#define MFC0(var, reg)		MFC0_R(var, reg)
+#define MTC0_R(expr, reg, select)	MTC0_OP(mtc0, expr, reg, select)
+#define MTC0(expr, reg)			MTC0_R(expr, reg)
+
+#define MFC0_R(var, reg, select)	MFC0_OP(mfc0, var, reg, select)
+#define MFC0(var, reg)			MFC0_R(var, reg)
+
+#define DMTC0_R(expr, reg, select)	MTC0_OP(dmtc0, expr, reg, select)
+#define DMTC0(expr, reg)		DMTC0_R(expr, reg)
+
+#define DMFC0_R(var, reg, select)	MFC0_OP(dmfc0, var, reg, select)
+#define DMFC0(var, reg)			DMFC0_R(var, reg)
 
 #define TLBR()				\
 do {					\
