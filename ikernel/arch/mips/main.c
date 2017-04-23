@@ -26,6 +26,96 @@ void k_main_args(unsigned long arg0, unsigned long arg1, unsigned long arg2)
 	}
 }
 
+static int syscall_advance_pc(ou_uint32_t cause)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	unsigned long pc;
+	ou_uint32_t instr;
+	unsigned int rs;
+	long offset;
+
+	MFC0(pc, MIPS_CP0_EPC);
+
+	if (cause & MIPS_CP0_CAUSE_BD) {
+		MFC0(instr, MIPS_CP0_BADINSTRP);
+
+		switch (instr & MIPS_INSTR_OPCODE) {
+		case MIPS_INSTR_OPCODE_SPECIAL:
+			switch (instr & MIPS_INSTR_SPECIAL_OPCODE) {
+			case MIPS_INSTR_SPECIAL_JR:
+			case MIPS_INSTR_SPECIAL_JALR:
+				rs = (instr & MIPS_INSTR_RS) >> 21;
+				pc = k_context.gpr.by_index[rs].u;
+				break;
+
+			default:
+				retval = -OU_ERR_UNKNOWN;
+				goto ret;
+			}
+			break;
+
+		case MIPS_INSTR_OPCODE_REGIMM:
+			switch (instr & MIPS_INSTR_REGIMM_OPCODE) {
+			case MIPS_INSTR_REGIMM_BGEZ:
+			case MIPS_INSTR_REGIMM_BGEZAL:
+				offset = (short) (instr & MIPS_INSTR_OFFSET);
+				pc += offset << 2;
+				break;
+
+			default:
+				retval = -OU_ERR_UNKNOWN;
+				goto ret;
+			}
+			break;
+
+		case MIPS_INSTR_OPCODE_J:
+		case MIPS_INSTR_OPCODE_JAL:
+		case MIPS_INSTR_OPCODE_JALX:
+			pc &= ~MIPS_INSTR_J_INDEX << 2;
+			pc |= (instr & MIPS_INSTR_J_INDEX) << 2;
+			break;
+
+		case MIPS_INSTR_OPCODE_BEQ:
+		case MIPS_INSTR_OPCODE_BNE:
+		case MIPS_INSTR_OPCODE_BLEZ:
+		case MIPS_INSTR_OPCODE_BGTZ:
+		case MIPS_INSTR_OPCODE_BEQL:
+		case MIPS_INSTR_OPCODE_BNEL:
+		case MIPS_INSTR_OPCODE_BLEZL:
+		case MIPS_INSTR_OPCODE_BGTZL:
+			offset = (short) (instr & MIPS_INSTR_OFFSET);
+			pc += offset << 2;
+			break;
+
+		case MIPS_INSTR_OPCODE_COP1:
+		case MIPS_INSTR_OPCODE_COP2:
+			switch (instr & MIPS_INSTR_COP_BC) {
+			case MIPS_INSTR_COP_BC:
+				offset = (short) (instr & MIPS_INSTR_OFFSET);
+				pc += offset << 2;
+				break;
+
+			default:
+				retval = -OU_ERR_UNKNOWN;
+				goto ret;
+			}
+			break;
+
+		default:
+			retval = -OU_ERR_UNKNOWN;
+			goto ret;
+		}
+	} else { /* Simpler case, just advance PC by 4 */
+		pc += 4;
+	}
+
+	MTC0(pc, MIPS_CP0_EPC);
+
+	retval = -OU_ERR_SUCCESS;
+ret:
+	return retval;
+}
+
 void k_entry(void)
 {
 	ou_uint32_t cause;
@@ -44,6 +134,7 @@ void k_entry(void)
 				k_context.gpr.by_name.s1.u,
 				k_context.gpr.by_name.s2.u,
 				k_context.gpr.by_name.s3.u);
+		syscall_advance_pc(cause);
 		break;
 	}
 }

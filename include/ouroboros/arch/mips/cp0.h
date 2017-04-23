@@ -101,6 +101,12 @@ struct mips_tlb_entry {
 /* BadVAddr Register */
 #define MIPS_CP0_BADVADDR			$8, 0
 
+/* BadInstr Register */
+#define MIPS_CP0_BADINSTR			$8, 1
+
+/* BadInstrP Register */
+#define MIPS_CP0_BADINSTRP			$8, 2
+
 /* Count Register */
 #define MIPS_CP0_COUNT				$9, 0
 

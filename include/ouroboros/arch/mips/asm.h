@@ -77,4 +77,42 @@ do {													\
 	__asm__ volatile("wrpgpr %[mips_reg], " CPP_STR(reg) : : [mips_reg] "r" (expr) :);	\
 } while (0)
 
+#define MIPS_INSTR_RS			BITS(25, 21)
+
+#define MIPS_INSTR_OPCODE		BITS(31, 26)
+
+#define MIPS_INSTR_OPCODE_SPECIAL	(0x00 << 26)
+#define MIPS_INSTR_OPCODE_REGIMM	(0x01 << 26)
+#define MIPS_INSTR_OPCODE_J		(0x02 << 26)
+#define MIPS_INSTR_OPCODE_JAL		(0x03 << 26)
+#define MIPS_INSTR_OPCODE_BEQ		(0x04 << 26)
+#define MIPS_INSTR_OPCODE_BNE		(0x05 << 26)
+#define MIPS_INSTR_OPCODE_BLEZ		(0x06 << 26)
+#define MIPS_INSTR_OPCODE_BGTZ		(0x07 << 26)
+#define MIPS_INSTR_OPCODE_COP1		(0x11 << 26)
+#define MIPS_INSTR_OPCODE_COP2		(0x12 << 26)
+#define MIPS_INSTR_OPCODE_BEQL		(0x14 << 26)
+#define MIPS_INSTR_OPCODE_BNEL		(0x15 << 26)
+#define MIPS_INSTR_OPCODE_BLEZL		(0x16 << 26)
+#define MIPS_INSTR_OPCODE_BGTZL		(0x17 << 26)
+#define MIPS_INSTR_OPCODE_JALX		(0x1D << 26)
+
+#define MIPS_INSTR_SPECIAL_OPCODE	BITS(5, 0)
+
+#define MIPS_INSTR_SPECIAL_JR		(0x08 << 0)
+#define MIPS_INSTR_SPECIAL_JALR		(0x09 << 0)
+
+#define MIPS_INSTR_REGIMM_OPCODE	BITS(20, 16)
+
+#define MIPS_INSTR_REGIMM_BGEZ		(0x01 << 16)
+#define MIPS_INSTR_REGIMM_BGEZAL	(0x11 << 16)
+
+#define MIPS_INSTR_COP			BITS(25, 21)
+
+#define MIPS_INSTR_COP_BC		(0x08 << 21)
+
+#define MIPS_INSTR_OFFSET		BITS(15, 0)
+
+#define MIPS_INSTR_J_INDEX		BITS(25, 0)
+
 #endif /* OUROBOROS_ARCH_MIPS_ASM_H */

@@ -32,6 +32,10 @@ static inline unsigned int k_get_current_cpu()
 	return (ebase & MIPS_CP0_EBASE_CPUNUM) >> 0;
 }
 
+void k_save_old_context(struct ou_context *context);
+
+void k_load_new_context(const struct ou_context *context);
+
 #endif /* __ASSEMBLER__ */
 
 #endif /* OUROBOROS_ARCH_MIPS_IKERNEL_ENTRY_H */
