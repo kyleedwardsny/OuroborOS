@@ -119,13 +119,15 @@ ret:
 void k_entry(void)
 {
 	ou_uint32_t cause;
+	ou_uint32_t instr;
 
 	MFC0(cause, MIPS_CP0_CAUSE);
 
 	switch (cause & MIPS_CP0_CAUSE_EXC) {
 	case MIPS_CP0_CAUSE_EXC_SYS:
+		MFC0(instr, MIPS_CP0_BADINSTR);
 		k_do_syscall(&k_context,
-				k_context.gpr.by_name.v0.u,
+				(instr & BITS(25, 6)) >> 6,
 				k_context.gpr.by_name.a0.u,
 				k_context.gpr.by_name.a1.u,
 				k_context.gpr.by_name.a2.u,

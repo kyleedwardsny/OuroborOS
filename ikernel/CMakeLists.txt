@@ -1,4 +1,4 @@
-project(ouroboros-kernel C ASM)
+project(ouroboros-ikernel C ASM)
 cmake_minimum_required(VERSION 3.5)
 
 include(OuCommon)
