@@ -25,7 +25,7 @@
 
 		ramdisk@1 {
 			description = "OuroborOS ramdisk";
-			data = /incbin/("./initrd.bin");
+			data = /incbin/("../build/ldinitrd/ldinitrd.bin");
 			type = "ramdisk";
 			arch = "mips";
 			os = "linux";

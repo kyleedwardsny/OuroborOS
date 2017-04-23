@@ -11,9 +11,10 @@ add_itb(image.itb image.its
 	"${CMAKE_CURRENT_BINARY_DIR}/fdt.itsi"
 	ikernel-bin
 	"${CMAKE_BINARY_DIR}/ikernel/ikernel.bin"
+	ldinitrd-bin
+	"${CMAKE_BINARY_DIR}/ldinitrd/ldinitrd.bin"
 	dtb
 	"${CMAKE_BINARY_DIR}/fdt/qemu_mips.dtb"
-	"${CMAKE_CURRENT_SOURCE_DIR}/initrd.bin"
 )
 
 add_custom_target(itb ALL DEPENDS image.itb)
