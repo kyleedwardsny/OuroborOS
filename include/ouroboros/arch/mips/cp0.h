@@ -1,19 +1,6 @@
 #ifndef OUROBOROS_ARCH_MIPS_CP0_H
 #define OUROBOROS_ARCH_MIPS_CP0_H
 
-#ifndef __ASSEMBLER__
-
-#include <ouroboros/stdint.h>
-
-struct mips_tlb_entry {
-	ou_uint32_t entry_lo0;
-	ou_uint32_t entry_lo1;
-	ou_uint32_t entry_ho;
-	ou_uint32_t page_mask;
-};
-
-#endif /* __ASSEMBLER__ */
-
 /* Cache coherency attributes */
 #define MIPS_CP0_CACHE_ATTR			(0x7)
 #define MIPS_CP0_CACHE_ATTR_ATTR(attr)		((attr) & MIPS_CP0_CACHE_ATTR)

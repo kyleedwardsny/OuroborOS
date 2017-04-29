@@ -5,7 +5,7 @@
 
 void k_save_old_context(struct ou_context *context)
 {
-	ou_uint32_t entry_hi;
+	unsigned long entry_hi;
 	size_t i;
 
 	for (i = 1; i < 32; i++) {
@@ -34,7 +34,7 @@ void k_save_old_context(struct ou_context *context)
 
 void k_load_new_context(const struct ou_context *context)
 {
-	ou_uint32_t entry_hi;
+	unsigned long entry_hi;
 	size_t i;
 
 	for (i = 1; i < 32; i++) {

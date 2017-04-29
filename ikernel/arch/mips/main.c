@@ -3,8 +3,10 @@
 
 #include <ouroboros/arch/mips/ikernel/config.h>
 #include <ouroboros/arch/mips/ikernel/entry.h>
+#include <ouroboros/arch/mips/ikernel/mmu.h>
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/context.h>
+#include <ouroboros/arch/mips/syscall.h>
 
 #include <ouroboros/errno.h>
 #include <ouroboros/stdint.h>
@@ -113,6 +115,49 @@ static int syscall_advance_pc(ou_uint32_t cause)
 
 	retval = -OU_ERR_SUCCESS;
 ret:
+	return retval;
+}
+
+static int arch_syscall_readtlb(struct ou_context *context,
+					unsigned long arg0,
+					unsigned long arg1)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	struct tlb_entry *entries = (struct tlb_entry *) arg0;
+	ou_size_t num_entries = arg1;
+	ou_size_t i;
+
+	for (i = 0; i < k_num_tlb_entries && i < num_entries; i++) {
+		k_get_tlb_entry(i, entries + i);
+	}
+
+	retval = k_num_tlb_entries;
+ret:
+	return retval;
+}
+
+static long arch_syscall(struct ou_context *context,
+				unsigned long syscall_num,
+				unsigned long arg0,
+				unsigned long arg1,
+				unsigned long arg2,
+				unsigned long arg3,
+				unsigned long arg4,
+				unsigned long arg5,
+				unsigned long arg6,
+				unsigned long arg7)
+{
+	long retval = -OU_ERR_UNKNOWN;
+
+	switch (syscall_num) {
+	case OU_SYSCALL_READTLB:
+		retval = arch_syscall_readtlb(context, arg0, arg1);
+		break;
+
+	case OU_SYSCALL_SWCONTEXT:
+		break;
+	}
+
 	return retval;
 }
 

@@ -78,7 +78,7 @@ void k_clear_tlb(void)
 	}
 }
 
-static int check_entry_lo_validity(ou_uint32_t entry_lo)
+static int check_entry_lo_validity(unsigned long entry_lo)
 {
 	int retval = -OU_ERR_UNKNOWN;
 
@@ -104,7 +104,7 @@ ret:
 	return retval;
 }
 
-static int check_tlb_entry_validity(int index, const struct mips_tlb_entry *entry)
+static int check_tlb_entry_validity(int index, const struct tlb_entry *entry)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
@@ -124,7 +124,7 @@ static int check_tlb_entry_validity(int index, const struct mips_tlb_entry *entr
 		goto ret;
 	}
 
-	if (entry->entry_ho & BITS(12, 8)) {
+	if (entry->entry_hi & BITS(12, 8)) {
 		retval = -OU_ERR_INVALID_ARGUMENT;
 		goto ret;
 	}
@@ -151,7 +151,30 @@ ret:
 	return retval;
 }
 
-int k_set_tlb_entry(int index, const struct mips_tlb_entry *entry)
+int k_get_tlb_entry(int index, struct tlb_entry *entry)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	int err;
+
+	if (index < 0 || index >= k_num_tlb_entries) {
+		retval = -OU_ERR_INVALID_ARGUMENT;
+		goto ret;
+	}
+
+	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
+	TLBR();
+
+	MFC0(entry->entry_lo0, MIPS_CP0_ENTRY_LO0);
+	MFC0(entry->entry_lo1, MIPS_CP0_ENTRY_LO1);
+	MFC0(entry->entry_hi, MIPS_CP0_ENTRY_HO);
+	MFC0(entry->page_mask, MIPS_CP0_PAGE_MASK);
+
+	retval = -OU_ERR_SUCCESS;
+ret:
+	return retval;
+}
+
+int k_set_tlb_entry(int index, const struct tlb_entry *entry)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
@@ -163,7 +186,7 @@ int k_set_tlb_entry(int index, const struct mips_tlb_entry *entry)
 
 	MTC0(entry->entry_lo0, MIPS_CP0_ENTRY_LO0);
 	MTC0(entry->entry_lo1, MIPS_CP0_ENTRY_LO1);
-	MTC0(entry->entry_ho, MIPS_CP0_ENTRY_HO);
+	MTC0(entry->entry_hi, MIPS_CP0_ENTRY_HO);
 	MTC0(entry->page_mask, MIPS_CP0_PAGE_MASK);
 
 	if (index < 0) { /* Random index */

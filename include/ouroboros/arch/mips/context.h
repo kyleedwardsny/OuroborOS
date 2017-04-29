@@ -92,6 +92,18 @@ union gpr_store {
 	gpr_t by_index[32];
 };
 
+struct tlb_entry {
+	unsigned long entry_lo0;
+	unsigned long entry_lo1;
+	unsigned long entry_hi;
+	unsigned long page_mask;
+};
+
+struct tlb_entry_access {
+	int index;
+	struct tlb_entry entry;
+};
+
 struct ou_context {
 	/* Context mask */
 	unsigned long mask_regs;
@@ -113,6 +125,9 @@ struct ou_context {
 struct ou_context_switch {
 	const struct ou_context *new_context;
 	struct ou_context *old_context;
+
+	const struct tlb_entry_access *tlb_entries;
+	ou_size_t num_tlb_entries;
 };
 
 #endif /* __ASSEMBLER__ */
