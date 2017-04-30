@@ -2,10 +2,10 @@
 
 	.section .rodata.header
 
-_load_addr:
-	.word 0x40000000
+_header_load_addr:
+	.word _load_addr
 
-_entry_addr:
+_header_entry_addr:
 	.word _start
 
 	.section .text.early

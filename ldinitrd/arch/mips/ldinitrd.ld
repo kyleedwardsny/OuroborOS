@@ -1,6 +1,7 @@
 SECTIONS
 {
-	. = 0x40000000;
+	_load_addr = 0x40000000;
+	. = _load_addr;
 
 	.rodata.header :
 	{
@@ -25,7 +26,7 @@ SECTIONS
 	.bss.early :
 	{
 		*(.bss.early)
-		ASSERT(. <= 0x40001000, "early section is too big");
+		ASSERT(. <= _load_addr + 0x1000, "early section is too big");
 	}
 
 	. = ALIGN(4);

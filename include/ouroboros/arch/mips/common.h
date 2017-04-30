@@ -16,7 +16,7 @@
 #define GPR_LOAD		lw
 
 #define PAGE_SIZE		(0x1000)
-#define IS_PAGE_ALIGNED(val)	((val & (PAGE_SIZE - 1)) == 0)
+#define IS_PAGE_ALIGNED(val)	(((val) & (PAGE_SIZE - 1)) == 0)
 
 #ifndef __ASSEMBLER__
 

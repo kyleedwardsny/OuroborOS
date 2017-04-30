@@ -224,12 +224,17 @@ int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr)
 		goto ret;
 	}
 
-	index = (k_num_tlb_entries - 1) & MIPS_CP0_INDEX_INDEX;
+	index = 0 & MIPS_CP0_INDEX_INDEX;
 	MTC0(index, MIPS_CP0_INDEX);
 
 	entry_lo = MIPS_CP0_ENTRY_LO_PFN_PFN(((ou_size_t) start) & ~0xC0000000) | MIPS_CP0_ENTRY_LO_C_C(MIPS_CP0_CACHE_ATTR_U) | MIPS_CP0_ENTRY_LO_D | MIPS_CP0_ENTRY_LO_V;
-	MTC0(entry_lo, MIPS_CP0_ENTRY_LO0);
-	entry_ho = MIPS_CP0_ENTRY_HO_VPN2_VPN2((ou_size_t) load_addr) | MIPS_CP0_ENTRY_HO_ASID_ASID(1);
+
+	if (((unsigned long) load_addr) & 0x1000) { /* Odd/even page number? */
+		MTC0(entry_lo, MIPS_CP0_ENTRY_LO1);
+	} else {
+		MTC0(entry_lo, MIPS_CP0_ENTRY_LO0);
+	}
+	entry_ho = MIPS_CP0_ENTRY_HO_VPN2_VPN2((ou_size_t) load_addr) | MIPS_CP0_ENTRY_HO_ASID_ASID(0);
 	MTC0(entry_ho, MIPS_CP0_ENTRY_HO);
 	MTC0(MIPS_CP0_PAGE_MASK_MASK_4K, MIPS_CP0_PAGE_MASK);
 
