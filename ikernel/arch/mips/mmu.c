@@ -155,11 +155,14 @@ int k_get_tlb_entry(int index, struct tlb_entry *entry)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
+	unsigned long hi_old;
 
 	if (index < 0 || index >= k_num_tlb_entries) {
 		retval = -OU_ERR_INVALID_ARGUMENT;
 		goto ret;
 	}
+
+	MFC0(hi_old, MIPS_CP0_ENTRY_HO);
 
 	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
 	TLBR();
@@ -168,6 +171,8 @@ int k_get_tlb_entry(int index, struct tlb_entry *entry)
 	MFC0(entry->entry_lo1, MIPS_CP0_ENTRY_LO1);
 	MFC0(entry->entry_hi, MIPS_CP0_ENTRY_HO);
 	MFC0(entry->page_mask, MIPS_CP0_PAGE_MASK);
+
+	MTC0(hi_old, MIPS_CP0_ENTRY_HO);
 
 	retval = -OU_ERR_SUCCESS;
 ret:
@@ -178,11 +183,14 @@ int k_set_tlb_entry(int index, const struct tlb_entry *entry)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
+	unsigned long hi_old;
 
 	if ((err = check_tlb_entry_validity(index, entry)) < 0) {
 		retval = err;
 		goto ret;
 	}
+
+	MFC0(hi_old, MIPS_CP0_ENTRY_HO);
 
 	MTC0(entry->entry_lo0, MIPS_CP0_ENTRY_LO0);
 	MTC0(entry->entry_lo1, MIPS_CP0_ENTRY_LO1);
@@ -195,6 +203,8 @@ int k_set_tlb_entry(int index, const struct tlb_entry *entry)
 		MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
 		TLBWI();
 	}
+
+	MTC0(hi_old, MIPS_CP0_ENTRY_HO);
 
 	retval = -OU_ERR_SUCCESS;
 ret:

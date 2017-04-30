@@ -4,6 +4,7 @@
 #include <ouroboros/arch/mips/ikernel/config.h>
 #include <ouroboros/arch/mips/ikernel/entry.h>
 #include <ouroboros/arch/mips/ikernel/mmu.h>
+#include <ouroboros/arch/mips/ikernel/userspace.h>
 #include <ouroboros/arch/mips/cp0.h>
 #include <ouroboros/arch/mips/context.h>
 #include <ouroboros/arch/mips/syscall.h>
@@ -123,13 +124,28 @@ static int arch_syscall_readtlb(struct ou_context *context,
 					unsigned long arg1)
 {
 	int retval = -OU_ERR_UNKNOWN;
-	struct tlb_entry *entries = (struct tlb_entry *) arg0;
+	struct tlb_entry *entries_u = (struct tlb_entry *) arg0;
+	struct tlb_entry *entries;
+	struct tlb_entry entry;
 	ou_size_t num_entries = arg1;
 	ou_size_t i;
 
-	for (i = 0; i < k_num_tlb_entries && i < num_entries; i++) {
-		k_get_tlb_entry(i, entries + i);
+	if (!k_access_ok(entries_u, num_entries * sizeof(*entries_u), ACCESS_LEVEL_USER)) {
+		retval = -OU_ERR_PERMISSION;
+		goto ret;
 	}
+
+	entries = k_get_userspace_window(entries_u, num_entries * sizeof(*entries_u));
+
+	for (i = 0; i < k_num_tlb_entries && i < num_entries; i++) {
+		k_get_tlb_entry(i, &entry);
+		entries[i].entry_lo0 = entry.entry_lo0;
+		entries[i].entry_lo1 = entry.entry_lo1;
+		entries[i].entry_hi = entry.entry_hi;
+		entries[i].page_mask = entry.page_mask;
+	}
+
+	k_put_userspace_window(entries, num_entries * sizeof(*entries));
 
 	retval = k_num_tlb_entries;
 ret:
@@ -165,23 +181,25 @@ void k_entry(void)
 {
 	ou_uint32_t cause;
 	ou_uint32_t instr;
+	unsigned long retval;
 
 	MFC0(cause, MIPS_CP0_CAUSE);
 
 	switch (cause & MIPS_CP0_CAUSE_EXC) {
 	case MIPS_CP0_CAUSE_EXC_SYS:
 		MFC0(instr, MIPS_CP0_BADINSTR);
-		k_do_syscall(&k_context,
-				(instr & BITS(25, 6)) >> 6,
-				k_context.gpr.by_name.a0.u,
-				k_context.gpr.by_name.a1.u,
-				k_context.gpr.by_name.a2.u,
-				k_context.gpr.by_name.a3.u,
-				k_context.gpr.by_name.s0.u,
-				k_context.gpr.by_name.s1.u,
-				k_context.gpr.by_name.s2.u,
-				k_context.gpr.by_name.s3.u);
+		retval = arch_syscall(&k_context,
+					(instr & BITS(25, 6)) >> 6,
+					k_context.gpr.by_name.a0.u,
+					k_context.gpr.by_name.a1.u,
+					k_context.gpr.by_name.a2.u,
+					k_context.gpr.by_name.a3.u,
+					k_context.gpr.by_name.s0.u,
+					k_context.gpr.by_name.s1.u,
+					k_context.gpr.by_name.s2.u,
+					k_context.gpr.by_name.s3.u);
 		syscall_advance_pc(cause);
+		k_context.gpr.by_name.v0.u = retval;
 		break;
 	}
 }
