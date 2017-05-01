@@ -1,6 +1,7 @@
 include(OuCommon)
 
 add_sources(ldinitrd.elf
+	early_data.c
 	head.S
 )
 
