@@ -161,11 +161,11 @@ static long arch_syscall(struct ou_context *context,
 	long retval = -OU_ERR_UNKNOWN;
 
 	switch (syscall_num) {
-	case OU_SYSCALL_READTLB:
-		retval = arch_syscall_readtlb(context, arg0, arg1);
+	case OU_SYSCALL_SWCONTEXT:
 		break;
 
-	case OU_SYSCALL_SWCONTEXT:
+	case OU_SYSCALL_READTLB:
+		retval = arch_syscall_readtlb(context, arg0, arg1);
 		break;
 	}
 
