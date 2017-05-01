@@ -124,8 +124,8 @@ static int arch_syscall_readtlb(struct ou_context *context,
 					unsigned long arg1)
 {
 	int retval = -OU_ERR_UNKNOWN;
-	struct tlb_entry *entries_u = (struct tlb_entry *) arg0;
-	struct tlb_entry *entries;
+	struct tlb_entry_access *entries_u = (struct tlb_entry_access *) arg0;
+	struct tlb_entry_access *entries;
 	ou_size_t num_entries = arg1;
 	ou_size_t i;
 
@@ -137,7 +137,7 @@ static int arch_syscall_readtlb(struct ou_context *context,
 	entries = k_get_userspace_window(entries_u, num_entries * sizeof(*entries_u));
 
 	for (i = 0; i < k_num_tlb_entries && i < num_entries; i++) {
-		k_get_tlb_entry(i, entries + i);
+		k_get_tlb_entry(entries[i].index, &entries[i].entry);
 	}
 
 	k_put_userspace_window(entries, num_entries * sizeof(*entries));
