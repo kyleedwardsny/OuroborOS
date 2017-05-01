@@ -32,3 +32,20 @@ struct tlb_entry_access tlb_read_data[64] __attribute__((section(".data.early"))
 #undef TLB_ENTRY_ACCESS
 
 ou_size_t tlb_read_data_num_entries __attribute__((section(".data.early"))) = ARRAY_SIZE(tlb_read_data);
+
+struct ou_context new_context __attribute__((section(".data.early"))) = {
+	.mask_regs = 0,
+	.mask_0 = 0,
+};
+
+struct ou_context old_context __attribute__((section(".data.early"))) = {
+	.mask_regs = 0,
+	.mask_0 = 0,
+};
+
+struct ou_context_switch context_switch __attribute__((section(".data.early"))) = {
+	.new_context = &new_context,
+	.old_context = &old_context,
+	.tlb_entries = tlb_read_data,
+	.num_tlb_entries = 1,
+};

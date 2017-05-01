@@ -119,15 +119,56 @@ ret:
 	return retval;
 }
 
+static int arch_syscall_swcontext(struct ou_context *context,
+					unsigned long arg0)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	const struct ou_context_switch *ctxsw_u = (const struct ou_context_switch *) arg0;
+	const struct ou_context_switch *ctxsw;
+	struct ou_context_switch ctxsw_local;
+
+	if (!k_access_ok(ctxsw_u, sizeof(*ctxsw_u), ACCESS_LEVEL_USER)) {
+		retval = -OU_ERR_PERMISSION;
+		goto ret;
+	}
+
+	ctxsw = k_get_userspace_window(ctxsw_u, sizeof(*ctxsw_u));
+
+	if (!k_access_ok(ctxsw->old_context, sizeof(*ctxsw->old_context), ACCESS_LEVEL_USER)) {
+		retval = -OU_ERR_PERMISSION;
+		goto cleanup_ctxsw;
+	} else if (!k_access_ok(ctxsw->new_context, sizeof(*ctxsw->new_context), ACCESS_LEVEL_USER)) {
+		retval = -OU_ERR_PERMISSION;
+		goto cleanup_ctxsw;
+	} else if (!k_access_ok(ctxsw->tlb_entries, sizeof(*ctxsw->tlb_entries) * ctxsw->num_tlb_entries, ACCESS_LEVEL_USER)) {
+		retval = -OU_ERR_PERMISSION;
+		goto cleanup_ctxsw;
+	}
+
+	ctxsw_local.old_context = k_get_userspace_window(ctxsw->old_context, sizeof(*ctxsw->old_context));
+	ctxsw_local.new_context = k_get_userspace_window(ctxsw->new_context, sizeof(*ctxsw->new_context));
+	ctxsw_local.tlb_entries = k_get_userspace_window(ctxsw->tlb_entries, sizeof(*ctxsw->tlb_entries) * ctxsw->num_tlb_entries);
+	ctxsw_local.num_tlb_entries = ctxsw->num_tlb_entries;
+
+	retval = k_switch_context(&ctxsw_local);
+cleanup_ctx:
+	k_free_userspace_window(ctxsw_local.new_context, sizeof(*ctxsw_local.new_context));
+	k_put_userspace_window(ctxsw->old_context, ctxsw_local.old_context, sizeof(*ctxsw_local.old_context));
+cleanup_ctxsw:
+	k_free_userspace_window(ctxsw, sizeof(*ctxsw));
+ret:
+	return retval;
+}
+
 static int arch_syscall_readtlb(struct ou_context *context,
 					unsigned long arg0,
 					unsigned long arg1)
 {
 	int retval = -OU_ERR_UNKNOWN;
+	int err;
 	struct tlb_entry_access *entries_u = (struct tlb_entry_access *) arg0;
 	struct tlb_entry_access *entries;
 	ou_size_t num_entries = arg1;
-	ou_size_t i;
 
 	if (!k_access_ok(entries_u, num_entries * sizeof(*entries_u), ACCESS_LEVEL_USER)) {
 		retval = -OU_ERR_PERMISSION;
@@ -136,13 +177,11 @@ static int arch_syscall_readtlb(struct ou_context *context,
 
 	entries = k_get_userspace_window(entries_u, num_entries * sizeof(*entries_u));
 
-	for (i = 0; i < k_num_tlb_entries && i < num_entries; i++) {
-		k_get_tlb_entry(entries[i].index, &entries[i].entry);
-	}
+	err = k_get_tlb_entries(entries, num_entries);
 
-	k_put_userspace_window(entries, num_entries * sizeof(*entries));
+	k_put_userspace_window(entries_u, entries, num_entries * sizeof(*entries));
 
-	retval = k_num_tlb_entries;
+	retval = err;
 ret:
 	return retval;
 }
@@ -162,6 +201,7 @@ static long arch_syscall(struct ou_context *context,
 
 	switch (syscall_num) {
 	case OU_SYSCALL_SWCONTEXT:
+		retval = arch_syscall_swcontext(context, arg0);
 		break;
 
 	case OU_SYSCALL_READTLB:

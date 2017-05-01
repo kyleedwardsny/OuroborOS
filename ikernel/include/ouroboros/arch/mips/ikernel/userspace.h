@@ -27,7 +27,8 @@ static inline int k_access_ok(const void *addr, ou_size_t size, unsigned int acc
 	}
 }
 
-#define k_get_userspace_window(addr, size)	((void *) (addr))
-#define k_put_userspace_window(addr, size)
+#define k_get_userspace_window(uaddr, size)		((void *) (uaddr))
+#define k_free_userspace_window(addr, size)
+#define k_put_userspace_window(uaddr, addr, size)
 
 #endif /* OUROBOROS_ARCH_MIPS_IKERNEL_USERSPACE_H */

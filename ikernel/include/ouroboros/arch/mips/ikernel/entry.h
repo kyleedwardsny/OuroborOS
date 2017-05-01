@@ -36,6 +36,8 @@ void k_save_old_context(struct ou_context *context);
 
 void k_load_new_context(const struct ou_context *context);
 
+int k_switch_context(const struct ou_context_switch *context_switch);
+
 #endif /* __ASSEMBLER__ */
 
 #endif /* OUROBOROS_ARCH_MIPS_IKERNEL_ENTRY_H */

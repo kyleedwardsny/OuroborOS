@@ -3,6 +3,7 @@
 #include <ouroboros/ikernel/config.h>
 
 #include <ouroboros/arch/mips/ikernel/config.h>
+#include <ouroboros/arch/mips/ikernel/mmu.h>
 #include <ouroboros/arch/mips/cp0.h>
 
 #include <ouroboros/common.h>
@@ -78,7 +79,7 @@ void k_clear_tlb(void)
 	}
 }
 
-static int check_entry_lo_validity(unsigned long entry_lo)
+static int check_entry_lo(unsigned long entry_lo)
 {
 	int retval = -OU_ERR_UNKNOWN;
 
@@ -99,12 +100,12 @@ static int check_entry_lo_validity(unsigned long entry_lo)
 		goto ret;
 	}
 
-	retval -OU_ERR_SUCCESS;
+	retval = -OU_ERR_SUCCESS;
 ret:
 	return retval;
 }
 
-static int check_tlb_entry_validity(int index, const struct tlb_entry *entry)
+static int check_tlb_entry(int index, const struct tlb_entry *entry)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
@@ -114,12 +115,12 @@ static int check_tlb_entry_validity(int index, const struct tlb_entry *entry)
 		goto ret;
 	}
 
-	if ((err = check_entry_lo_validity(entry->entry_lo0)) < 0) {
+	if ((err = check_entry_lo(entry->entry_lo0)) < 0) {
 		retval = err;
 		goto ret;
 	}
 
-	if ((err = check_entry_lo_validity(entry->entry_lo1)) < 0) {
+	if ((err = check_entry_lo(entry->entry_lo1)) < 0) {
 		retval = err;
 		goto ret;
 	}
@@ -151,78 +152,86 @@ ret:
 	return retval;
 }
 
-int k_get_tlb_entry(int index, struct tlb_entry *entry)
+int k_get_tlb_entries(struct tlb_entry_access *entries, ou_size_t num_entries)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
+	ou_size_t i;
 	unsigned long hi_old;
 	unsigned long entry_lo0;
 	unsigned long entry_lo1;
 	unsigned long entry_hi;
 	unsigned long page_mask;
 
-	if (index < 0 || index >= k_num_tlb_entries) {
-		retval = -OU_ERR_INVALID_ARGUMENT;
-		goto ret;
+	for (i = 0; i < num_entries; i++) {
+		if (entries[i].index < 0 || entries[i].index >= k_num_tlb_entries) {
+			retval = -OU_ERR_INVALID_ARGUMENT;
+			goto ret;
+		}
+
+		MFC0(hi_old, MIPS_CP0_ENTRY_HO);
+
+		MTC0(MIPS_CP0_INDEX_INDEX_INDEX(entries[i].index), MIPS_CP0_INDEX);
+		TLBR();
+
+		MFC0(entry_lo0, MIPS_CP0_ENTRY_LO0);
+		MFC0(entry_lo1, MIPS_CP0_ENTRY_LO1);
+		MFC0(entry_hi, MIPS_CP0_ENTRY_HO);
+		MFC0(page_mask, MIPS_CP0_PAGE_MASK);
+
+		MTC0(hi_old, MIPS_CP0_ENTRY_HO);
+
+		entries[i].entry.entry_lo0 = entry_lo0;
+		entries[i].entry.entry_lo1 = entry_lo1;
+		entries[i].entry.entry_hi = entry_hi;
+		entries[i].entry.page_mask = page_mask;
 	}
-
-	MFC0(hi_old, MIPS_CP0_ENTRY_HO);
-
-	MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
-	TLBR();
-
-	MFC0(entry_lo0, MIPS_CP0_ENTRY_LO0);
-	MFC0(entry_lo1, MIPS_CP0_ENTRY_LO1);
-	MFC0(entry_hi, MIPS_CP0_ENTRY_HO);
-	MFC0(page_mask, MIPS_CP0_PAGE_MASK);
-
-	MTC0(hi_old, MIPS_CP0_ENTRY_HO);
-
-	entry->entry_lo0 = entry_lo0;
-	entry->entry_lo1 = entry_lo1;
-	entry->entry_hi = entry_hi;
-	entry->page_mask = page_mask;
 
 	retval = -OU_ERR_SUCCESS;
 ret:
 	return retval;
 }
 
-int k_set_tlb_entry(int index, const struct tlb_entry *entry)
+int k_set_tlb_entries(const struct tlb_entry_access *entries, ou_size_t num_entries)
 {
 	int retval = -OU_ERR_UNKNOWN;
 	int err;
+	ou_size_t i;
 	unsigned long hi_old;
 	unsigned long entry_lo0;
 	unsigned long entry_lo1;
 	unsigned long entry_hi;
 	unsigned long page_mask;
 
-	if ((err = check_tlb_entry_validity(index, entry)) < 0) {
-		retval = err;
-		goto ret;
+	for (i = 0; i < num_entries; i++) {
+		if ((err = check_tlb_entry(entries[i].index, &entries[i].entry)) < 0) {
+			retval = err;
+			goto ret;
+		}
 	}
 
-	entry_lo0 = entry->entry_lo0;
-	entry_lo1 = entry->entry_lo1;
-	entry_hi = entry->entry_hi;
-	page_mask = entry->page_mask;
+	for (i = 0; i < num_entries; i++) {
+		entry_lo0 = entries[i].entry.entry_lo0;
+		entry_lo1 = entries[i].entry.entry_lo1;
+		entry_hi = entries[i].entry.entry_hi;
+		page_mask = entries[i].entry.page_mask;
 
-	MFC0(hi_old, MIPS_CP0_ENTRY_HO);
+		MFC0(hi_old, MIPS_CP0_ENTRY_HO);
 
-	MTC0(entry_lo0, MIPS_CP0_ENTRY_LO0);
-	MTC0(entry_lo1, MIPS_CP0_ENTRY_LO1);
-	MTC0(entry_hi, MIPS_CP0_ENTRY_HO);
-	MTC0(page_mask, MIPS_CP0_PAGE_MASK);
+		MTC0(entry_lo0, MIPS_CP0_ENTRY_LO0);
+		MTC0(entry_lo1, MIPS_CP0_ENTRY_LO1);
+		MTC0(entry_hi, MIPS_CP0_ENTRY_HO);
+		MTC0(page_mask, MIPS_CP0_PAGE_MASK);
 
-	if (index < 0) { /* Random index */
-		TLBWR();
-	} else {
-		MTC0(MIPS_CP0_INDEX_INDEX_INDEX(index), MIPS_CP0_INDEX);
-		TLBWI();
+		if (entries[i].index < 0) { /* Random index */
+			TLBWR();
+		} else {
+			MTC0(MIPS_CP0_INDEX_INDEX_INDEX(entries[i].index), MIPS_CP0_INDEX);
+			TLBWI();
+		}
+
+		MTC0(hi_old, MIPS_CP0_ENTRY_HO);
 	}
-
-	MTC0(hi_old, MIPS_CP0_ENTRY_HO);
 
 	retval = -OU_ERR_SUCCESS;
 ret:

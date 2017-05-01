@@ -1,5 +1,8 @@
+#include <ouroboros/errno.h>
+
 #include <ouroboros/arch/mips/context.h>
 #include <ouroboros/arch/mips/ikernel/entry.h>
+#include <ouroboros/arch/mips/ikernel/mmu.h>
 
 #include <ouroboros/ikernel/context.h>
 
@@ -61,4 +64,22 @@ void k_load_new_context(const struct ou_context *context)
 		entry_hi |= MIPS_CP0_ENTRY_HO_ASID_ASID(context->asid);
 		MTC0(entry_hi, MIPS_CP0_ENTRY_HO);
 	}
+}
+
+int k_switch_context(const struct ou_context_switch *context_switch)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	int err;
+
+	if ((err = k_set_tlb_entries(context_switch->tlb_entries, context_switch->num_tlb_entries)) < 0) {
+		retval = err;
+		goto ret;
+	}
+
+	k_save_old_context(context_switch->old_context);
+	k_load_new_context(context_switch->new_context);
+
+	retval = -OU_ERR_SUCCESS;
+ret:
+	return retval;
 }
