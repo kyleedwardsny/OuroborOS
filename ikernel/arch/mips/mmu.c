@@ -9,6 +9,7 @@
 #include <ouroboros/common.h>
 #include <ouroboros/errno.h>
 #include <ouroboros/stddef.h>
+#include <ouroboros/stdint.h>
 
 int _kernel_begin;
 int _kernel_size;
@@ -234,6 +235,73 @@ int k_set_tlb_entries(const struct tlb_entry_access *entries, ou_size_t num_entr
 	}
 
 	retval = -OU_ERR_SUCCESS;
+ret:
+	return retval;
+}
+
+static int get_physical_address_single(const void *addr, unsigned int asid, ou_uint64_t *result)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	unsigned long hi;
+	unsigned long lo;
+	unsigned long index;
+
+	hi = MIPS_CP0_ENTRY_HO_VPN2_VPN2((unsigned long) addr) | MIPS_CP0_ENTRY_HO_ASID_ASID(asid);
+	MTC0(hi, MIPS_CP0_ENTRY_HO);
+	TLBP();
+
+	MFC0(index, MIPS_CP0_INDEX);
+	if (index & MIPS_CP0_INDEX_P) {
+		retval = -OU_ERR_TLB_MISS;
+		goto ret;
+	}
+
+	TLBR();
+	if (((unsigned long) addr) & 0x1000) {
+		MFC0(lo, MIPS_CP0_ENTRY_LO1);
+	} else {
+		MFC0(lo, MIPS_CP0_ENTRY_LO0);
+	}
+
+	*result = ((lo & MIPS_CP0_ENTRY_LO_PFN) << 6) | ((unsigned long) addr) & 0xFFF;
+
+ret:
+	return retval;
+}
+
+int k_get_physical_address(const void *start, ou_size_t length, ou_uint64_t *result)
+{
+	int retval = -OU_ERR_UNKNOWN;
+	int err;
+	unsigned long hi_old;
+	const void *i;
+	ou_uint64_t pa_prev;
+	ou_uint64_t pa;
+
+	MFC0(hi_old, MIPS_CP0_ENTRY_HO);
+
+	if ((err = get_physical_address_single(start, hi_old & MIPS_CP0_ENTRY_HO_ASID, result)) < 0) {
+		retval = err;
+		goto cleanup_hi;
+	}
+
+	pa_prev = *result & ~0xFFF;
+	for (i = (const void *) ((unsigned long) start & ~0xFFF) + 0x1000; i <= start + length - 1; i += 0x1000) {
+		if ((err = get_physical_address_single(start, hi_old & MIPS_CP0_ENTRY_HO_ASID, &pa)) < 0) {
+			retval = err;
+			goto cleanup_hi;
+		}
+
+		if (pa != pa_prev + 0x1000) {
+			retval = -OU_ERR_NONCONTIGUOUS_MEMORY;
+			goto cleanup_hi;
+		}
+
+		pa_prev = pa;
+	}
+
+cleanup_hi:
+	MTC0(hi_old, MIPS_CP0_ENTRY_HO);
 ret:
 	return retval;
 }
