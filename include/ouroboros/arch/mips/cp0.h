@@ -495,6 +495,25 @@
 /* Trace Logic implemented */
 #define MIPS_CP0_CONFIG3_TL			(0x00000001)
 
+/* Config4 Register */
+#define MIPS_CP0_CONFIG4			$16, 4
+
+/* Config5 present */
+#define MIPS_CP0_CONFIG4_M			(0x80000000)
+/* TLB invalidate instruction support */
+#define MIPS_CP0_CONFIG4_IE			(0x60000000)
+#define MIPS_CP0_CONFIG4_IE_NONE		(0x00000000)
+#define MIPS_CP0_CONFIG4_IE_SINGLE_ENTRY	(0x40000000)
+#define MIPS_CP0_CONFIG4_IE_ALL_ENTRIES		(0x60000000)
+/* EntryHI(ASID) extended to 10 bits */
+#define MIPS_CP0_CONFIG4_AE			(0x10000000)
+/* VTLB size extension */
+#define MIPS_CP0_CONFIG4_VTLB_SIZEEXT		(0x0F000000)
+/* KScratch(n) register exists */
+#define MIPS_CP0_CONFIG4_KSCREXIST(n)		(0x00010000 << (n))
+/* MMU extension definition */
+#define MIPS_CP0_CONFIG4_MMU_EXT_DEF		(0x0000C000)
+
 /* Config7 Register */
 #define MIPS_CP0_CONFIG7			$16, 7
 
@@ -875,5 +894,8 @@
 
 /* DeSave Register */
 #define MIPS_CP0_DESAVE				$31, 0
+
+/* KScratch(n) Registers */
+#define MIPS_CP0_KSCRATCH(n)			$31, (n)
 
 #endif /* OUROBOROS_ARCH_MIPS_CP0_H */

@@ -102,16 +102,6 @@
 	add \kreg_addr, \kreg_clobber
 	.endm
 
-	.macro get_ebase kreg
-	mfc0 \kreg, MIPS_CP0_EBASE
-	andi \kreg, MIPS_CP0_EBASE_CPUNUM
-	sll \kreg, (16 + CTX_SIZE_LOG)
-
-	ori \kreg, _context_upper
-	rotr \kreg, 16
-	ori \kreg, _context_lower
-	.endm
-
 	.macro get_sp
 	mfc0 $t0, MIPS_CP0_EBASE
 	andi $t0, MIPS_CP0_EBASE_CPUNUM
@@ -121,8 +111,8 @@
 	add $sp, $t0
 	.endm
 
-	.type _entry_k0_k1, function
-_entry_k0_k1:
+	.type _entry_standard, function
+_entry_standard:
 	get_ebase_2 $k0, $k1
 	store_regs $k0
 
@@ -131,7 +121,7 @@ _entry_k0_k1:
 
 	.global k_exit_k0_k1
 	.type k_exit_k0_k1, function
-k_exit_k0_k1:
+k_exit_standard:
 	get_ebase_2 $k0, $k1
 	load_regs $k0
 	/* For security, don't leak this info */
@@ -140,114 +130,25 @@ k_exit_k0_k1:
 
 	eret
 
-	.type _entry_k0_rotr, function
-_entry_k0_rotr:
-	get_ebase $k0
-	store_regs $k0
-	GPR_STORE $k1, CTX_GPR_27_OFFSET($k0)
-
-	get_sp
-	bal k_entry
-
-	.global k_exit_k0_rotr
-	.type k_exit_k0_rotr, function
-k_exit_k0_rotr:
-	get_ebase_2 $k0, $k1
-	load_regs $k0
-	GPR_LOAD $k1, CTX_GPR_27_OFFSET($k0)
-	/* For security, don't leak this info */
-	move $k0, $0
-
-	eret
-
-	.type _entry_k1_rotr, function
-_entry_k1_rotr:
-	get_ebase $k1
-	store_regs $k1
-	GPR_STORE $k0, CTX_GPR_26_OFFSET($k1)
-
-	get_sp
-	bal k_entry
-
-	.global k_exit_k1_rotr
-	.type k_exit_k1_rotr, function
-k_exit_k1_rotr:
-	get_ebase_2 $k1, $k0
-	load_regs $k1
-	GPR_LOAD $k0, CTX_GPR_26_OFFSET($k1)
-	/* For security, don't leak this info */
-	move $k1, $0
-
-	eret
-
-	.type _entry_k0_ul, function
-_entry_k0_ul:
-	mtc0 $k1, MIPS_CP0_USER_LOCAL
-
-	get_ebase_2 $k1, $k0
-	store_regs $k1
-
-	move $k0, $k1
-	mfc0 $k1, MIPS_CP0_USER_LOCAL
-	GPR_STORE $k1, CTX_GPR_27_OFFSET($k0)
-
-	get_sp
-	bal k_entry
-
-	.global k_exit_k0_ul
-	.type k_exit_k0_ul, function
-k_exit_k0_ul:
-	get_ebase_2 $k0, $k1
-	load_regs $k0
-	GPR_LOAD $k1, CTX_GPR_27_OFFSET($k0) /* This MUST be done before $k0 */
-	/* For security, don't leak this info */
-	move $k0, $0
-
-	eret
-
-	.type _entry_k1_ul, function
-_entry_k1_ul:
-	mtc0 $k0, MIPS_CP0_USER_LOCAL
-
+	.type _entry_scratch, function
+_entry_scratch:
+	mtc0 $k0, MIPS_CP0_KSCRATCH(2)
+	mtc0 $k1, MIPS_CP0_KSCRATCH(3)
 	get_ebase_2 $k0, $k1
 	store_regs $k0
 
-	move $k1, $k0
-	mfc0 $k0, MIPS_CP0_USER_LOCAL
-	GPR_STORE $k0, CTX_GPR_26_OFFSET($k1)
+	move $t0, $k0
+	mfc0 $k0, MIPS_CP0_KSCRATCH(2)
+	mfc0 $k0, MIPS_CP0_KSCRATCH(3)
+	GPR_STORE $k0, CTX_GPR_26_OFFSET($t0)
+	GPR_STORE $k1, CTX_GPR_27_OFFSET($t0)
 
 	get_sp
 	bal k_entry
 
-	.global k_exit_k1_ul
-	.type k_exit_k1_ul, function
-k_exit_k1_ul:
-	get_ebase_2 $k1, $k0
-	load_regs $k1
-	GPR_LOAD $k0, CTX_GPR_26_OFFSET($k1)
-	/* For security, don't leak this info */
-	move $k1, $0
-
-	eret
-
-	.type _entry_ul_rotr, function
-_entry_ul_rotr:
-	mtc0 $k0, MIPS_CP0_USER_LOCAL
-
-	get_ebase $k0
-	store_regs $k0
-	GPR_STORE $k1, CTX_GPR_27_OFFSET($k0)
-
-	move $k1, $k0
-	mfc0 $k0, MIPS_CP0_USER_LOCAL
-	GPR_STORE $k0, CTX_GPR_26_OFFSET($k1)
-
-	get_sp
-	bal k_entry
-
-	.global k_exit_ul_rotr
-	.type k_exit_ul_rotr, function
-k_exit_ul_rotr:
+	.global k_exit_scratch
+	.type k_exit_scratch, function
+k_exit_scratch:
 	get_ebase_2 $k0, $k1
 	load_regs $k0
 	GPR_LOAD $k1, CTX_GPR_27_OFFSET($k0)
@@ -278,8 +179,8 @@ k_exit_shadow:
 	.org \evt + 0x180
 	.endm
 
-	.macro evt_interrupt evt int_num
-	.org \evt + 0x200 + (\int_num * 0x80)
+	.macro evt_interrupt evt
+	.org \evt + 0x200
 	.endm
 
 	.macro evt name
@@ -296,15 +197,11 @@ _evt_\name\()_tlb_refill:
 _evt_\name\()_general_exception:
 	j _entry_\name
 
-	evt_interrupt k_evt_\name 0
-_evt_\name\()_interrupt_0:
+	evt_interrupt k_evt_\name
+_evt_\name\()_interrupt:
 	j _entry_\name
 	.endm
 
-	evt k0_k1
-	evt k0_rotr
-	evt k1_rotr
-	evt k0_ul
-	evt k1_ul
-	evt ul_rotr
+	evt standard
+	evt scratch
 	evt shadow

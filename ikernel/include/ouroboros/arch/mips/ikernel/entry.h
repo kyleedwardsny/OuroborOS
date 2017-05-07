@@ -10,19 +10,13 @@
 
 CPU_LOCAL_DECLARE(struct ou_context, _k_context);
 
-void k_exit_k0_k1(void);
-
-void k_exit_k0_rotr(void);
-
-void k_exit_k1_rotr(void);
-
-void k_exit_k0_ul(void);
-
-void k_exit_k1_ul(void);
-
-void k_exit_ul_rotr(void);
-
+void k_exit_standard(void);
+void k_exit_scratch(void);
 void k_exit_shadow(void);
+
+void k_evt_standard(void);
+void k_evt_scratch(void);
+void k_evt_shadow(void);
 
 static inline unsigned int k_get_current_cpu()
 {
@@ -31,12 +25,6 @@ static inline unsigned int k_get_current_cpu()
 	MFC0(ebase, MIPS_CP0_EBASE);
 	return (ebase & MIPS_CP0_EBASE_CPUNUM) >> 0;
 }
-
-void k_save_old_context(struct ou_context *context);
-
-void k_load_new_context(const struct ou_context *context);
-
-int k_switch_context(const struct ou_context_switch *context_switch);
 
 #endif /* __ASSEMBLER__ */
 

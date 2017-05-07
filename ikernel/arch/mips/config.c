@@ -10,21 +10,16 @@
 CPU_LOCAL_DEFINE(unsigned int, _k_num_tlb_entries);
 CPU_LOCAL_DEFINE(unsigned int, _k_num_shadow_sets);
 CPU_LOCAL_DEFINE(int, _k_user_local_present);
-CPU_LOCAL_DEFINE(unsigned int, _k_entry_policy);
-CPU_LOCAL_DEFINE(unsigned int, _k_available_entry_policies);
-CPU_LOCAL_DEFINE(k_exit_fn, _k_exit_policy);
+CPU_LOCAL_DEFINE(int, _k_scratch_present);
+CPU_LOCAL_DEFINE(k_exit_fn, _k_exit_function);
 
 void k_read_cpu_config(void)
 {
 	ou_uint32_t config1;
 	ou_uint32_t config3;
+	ou_uint32_t config4;
 	ou_uint32_t srsctl;
 	unsigned int mmu_size;
-
-	k_available_entry_policies =
-		(0x1 << ENTRY_POLICY_K0_K1) |
-		(0x1 << ENTRY_POLICY_K0_ROTR) |
-		(0x1 << ENTRY_POLICY_K1_ROTR);
 
 	MFC0(config1, MIPS_CP0_CONFIG1);
 
@@ -34,70 +29,23 @@ void k_read_cpu_config(void)
 		k_num_tlb_entries = mmu_size + 1;
 	}
 
-	MFC0(srsctl, MIPS_CP0_SRSCTL);
-
-	/* Get the number of shadow register sets available */
-	k_num_shadow_sets = (srsctl & MIPS_CP0_SRSCTL_HSS) >> 26;
-	if (k_num_shadow_sets > 0) {
-		k_available_entry_policies |= (0x1 << ENTRY_POLICY_SHADOW);
-	}
-
 	MFC0(config3, MIPS_CP0_CONFIG3);
 
 	/* Get status of user-local register */
 	if (config3 & MIPS_CP0_CONFIG3_ULRI) {
 		k_user_local_present = 1;
-		k_available_entry_policies |=
-			(0x1 << ENTRY_POLICY_K0_UL) |
-			(0x1 << ENTRY_POLICY_K1_UL) |
-			(0x1 << ENTRY_POLICY_UL_ROTR);
 	}
 
-	k_set_entry_policy(ENTRY_POLICY_K0_K1);
+	MFC0(config4, MIPS_CP0_CONFIG4);
+
+	/* Get status of KScratch registers */
+	if (config4 & MIPS_CP0_CONFIG4_KSCREXIST(2) | MIPS_CP0_CONFIG4_KSCREXIST(3)
+			== MIPS_CP0_CONFIG4_KSCREXIST(2) | MIPS_CP0_CONFIG4_KSCREXIST(3)) {
+		k_scratch_present = 1;
+		k_exit_function = k_exit_scratch;
+	} else {
+		k_exit_function = k_exit_standard;
+	}
 }
 
 typedef void (*evt_fn)(void);
-
-static const evt_fn evts[] = {
-	[ENTRY_POLICY_K0_K1] = k_evt_k0_k1,
-	[ENTRY_POLICY_K0_ROTR] = k_evt_k0_rotr,
-	[ENTRY_POLICY_K1_ROTR] = k_evt_k1_rotr,
-	[ENTRY_POLICY_K0_UL] = k_evt_k0_ul,
-	[ENTRY_POLICY_K1_UL] = k_evt_k1_ul,
-	[ENTRY_POLICY_UL_ROTR] = k_evt_ul_rotr,
-	[ENTRY_POLICY_SHADOW] = k_evt_shadow,
-};
-
-static const k_exit_fn exit_fns[] = {
-	[ENTRY_POLICY_K0_K1] = k_exit_k0_k1,
-	[ENTRY_POLICY_K0_ROTR] = k_exit_k0_rotr,
-	[ENTRY_POLICY_K1_ROTR] = k_exit_k1_rotr,
-	[ENTRY_POLICY_K0_UL] = k_exit_k0_ul,
-	[ENTRY_POLICY_K1_UL] = k_exit_k1_ul,
-	[ENTRY_POLICY_UL_ROTR] = k_exit_ul_rotr,
-	[ENTRY_POLICY_SHADOW] = k_exit_shadow,
-};
-
-int k_set_entry_policy(unsigned int entry_policy)
-{
-	int retval = -OU_ERR_UNKNOWN;
-	ou_uint32_t status;
-
-	if (!(k_available_entry_policies & (0x1 << entry_policy))) {
-		retval = -OU_ERR_INVALID_ARGUMENT;
-		goto ret;
-	}
-
-	k_entry_policy = entry_policy;
-	k_exit_policy = exit_fns[entry_policy];
-
-	MTC0(MIPS_CP0_EBASE_EB_EB((ou_size_t) evts[entry_policy]), MIPS_CP0_EBASE);
-
-	MFC0(status, MIPS_CP0_STATUS);
-	status &= ~MIPS_CP0_STATUS_BEV;
-	MTC0(status, MIPS_CP0_STATUS);
-
-	retval = -OU_ERR_SUCCESS;
-ret:
-	return retval;
-}

@@ -2,6 +2,7 @@
 #include <ouroboros/ikernel/eat_self.h>
 
 #include <ouroboros/arch/mips/ikernel/config.h>
+#include <ouroboros/arch/mips/ikernel/context.h>
 #include <ouroboros/arch/mips/ikernel/entry.h>
 #include <ouroboros/arch/mips/ikernel/mmu.h>
 #include <ouroboros/arch/mips/ikernel/userspace.h>
@@ -241,7 +242,14 @@ void k_entry(void)
 
 void k_exit(void)
 {
-	k_exit_policy();
+	ou_uint32_t srsctl;
+
+	MFC0(srsctl, MIPS_CP0_SRSCTL);
+	if (srsctl & MIPS_CP0_SRSCTL_CSS) {
+		k_exit_shadow();
+	} else {
+		k_exit_no_shadow();
+	}
 }
 
 int k_enter_initrd(void *start, void *end, void *load_addr, void *entry_addr)

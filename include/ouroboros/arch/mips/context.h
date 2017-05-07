@@ -40,15 +40,25 @@
 #define CTX_GPR_30_OFFSET	(GPR_SIZE * 62)
 #define CTX_GPR_31_OFFSET	(GPR_SIZE * 63)
 
-#define CTX_HI_OFFSET		(GPR_SIZE * 32)
-#define CTX_LO_OFFSET		(GPR_SIZE * 33)
+#define CTX_HI_OFFSET		(GPR_SIZE * 29)
+#define CTX_LO_OFFSET		(GPR_SIZE * 30)
 
 #define CTX_MASK_0_PC		BIT(0)
 #define CTX_MASK_0_HI  		BIT(1)
 #define CTX_MASK_0_LO  		BIT(2)
 #define CTX_MASK_0_ASID		BIT(3)
+#define CTX_MASK_0_RDHWR_FLAGS	BIT(4)
+#define CTX_MASK_0_USER_LOCAL	BIT(5)
 
 #define CTX_MASK_REG_GPR(r)	BIT(r)
+
+#define CTX_FLAGS_IE		BIT(0)
+#define CTX_FLAGS_USER_EXC	BIT(1)
+#define CTX_FLAGS_SYSCALL	BIT(2)
+#define CTX_FLAGS_SUPERVISOR	BIT(3)
+#define CTX_FLAGS_CP1		BIT(4)
+#define CTX_FLAGS_CP2		BIT(5)
+#define CTX_FLAGS_CP3		BIT(6)
 
 #define TLB_ENTRY_ACCESS_INDEX_OFFSET		(GPR_SIZE * 0)
 #define TLB_ENTRY_ACCESS_ENTRY_LO0_OFFSET	(GPR_SIZE * 1)
@@ -114,11 +124,15 @@ struct ou_context {
 	/* Context mask */
 	unsigned long mask_regs;
 	unsigned long mask_0;
+	unsigned long mask_flags;
 
 	/* Space between mask and contents */
-	unsigned long _reserved[25];
+	unsigned long _reserved[21];
 
 	/* Actual contents of context */
+	unsigned long user_local;
+	unsigned long rdhwr_flags;
+	const void *initrd_load_addr;	/* Only meaningful in initrd header */
 	unsigned long flags;
 	unsigned long asid;	/* Address space ID */
 	unsigned long hi;
