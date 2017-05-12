@@ -94,3 +94,66 @@ to the Linux kernel's internal API. On the other hand, basic features such as
 file reading/writing, and even some Linux-specific features such as epoll, are
 trivial to implement on top of OuroborOS, with the exact same syscall ABI that
 the program would expect if it was running on Linux.
+
+## Memory Management
+
+The outer kernel is responsible for most of the memory management in OuroborOS.
+The inner kernel gets a small amount of memory to store its executable code,
+stack, and statically allocated data. These sections of memory are stored in
+a table in the inner kernel, and are passed to the outer kernel for the memory
+management algorithm.
+
+The outer kernel can implement stack and heap allocation any way it likes, as
+long as it avoids the memory reserved for the inner kernel. Since the inner
+kernel simply updates TLB entries as requested by the outer kernel, the outer
+kernel is responsible for keeping records of which memory pages are in use.
+
+Under most circumstances, attempts to map memory reserved for the inner kernel
+(by inserting or updating a TLB entry) will be denied by the inner kernel for
+obvious reasons. However, there are some exceptional circumstances in which
+mapping this memory may be desirable. The most notable example of this is the
+implementation of /dev/mem or another equivalent. This device should be able to
+map the CPU's entire address space. Therefore, the inner kernel will provide a
+way to override the safety checks on the inner kernel's memory, in the form of
+a password passed to the system call. Note that this password is not a secret,
+and it has no cryptographic significance; it is simply a way to verify that the
+request is legitimate and deliberate, rather than accidental, as well as
+preventing certain types of malicious attacks.
+
+To maintain security, in order to keep this password from being abused and
+passed to the inner kernel every time a TLB load is issued, the password will
+be rejected if it is not necessary. In other words, if the TLB load does not
+overlap with any of the inner kernel's reserved memory, and a password is still
+passed, the request will be rejected.
+
+One peculiar case of memory management requirements is the context buffers that
+are used to load/store contexts when an exception is triggered. When a context
+switch request is issued, the pointers that point to the context buffers will
+be valid virtual addresses at that time, with corresponding active TLB entries
+(if this is not the case, a kernel panic will be issued.) However, these pages
+may not necessarily be loaded when an exception is triggered.
+
+There are several ways to deal with this issue. One option is to require that
+the context buffer address be loaded into the TLB at all times. Unfortunately,
+to ensure that unauthorized userspace programs can't muck around with this
+buffer, this method requires that the processor have an intermediate ring
+between kernel mode and user mode, which not all processors have. Another
+option is to pass the context buffers as physical addresses. This is a great
+improvement over the first method, but it still has issues with cache
+coherency. In order to ensure that both the outer kernel and the inner kernel
+access this buffer with the same cache attributes, the cache attributes must
+be passed with the physical address.
+
+The way this issue is ultimately resolved is by designating an area of physical
+memory for the inner kernel and outer kernel to exchange data. This is done
+early on in the kernel load sequence, before any context switches occur. The
+outer kernel sends a message to the inner kernel stating what physical address
+the region starts at, how long it is, and what cache attributes to give it.
+Once this system call has been issued, the block of memory is now allocated and
+ready for data exchange between the inner kernel and outer kernel.
+
+This is a curious inversion of responsibilities between userspace and kernel
+space. In a traditional kernel, the kernel decides how to allocate memory for
+userspace. However, since the logic of memory management is happening in
+userspace, it is the other way around. The outer kernel, which runs in
+userspace, tells the inner kernel what memory it gets to use.
